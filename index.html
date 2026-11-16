@@ -1,0 +1,156 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0F352E">
+<meta name="description" content="김상진님의 평생 여행 로그 — 다녀온 나라·도시, 날짜별 기록과 사진, 수영대회 기록.">
+<title>김상진님의 평생 여행 로그</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%8F%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="topbar-row">
+    <div class="brand">🌏 <span>여행 로그</span></div>
+    <div class="tools">
+      <button id="btnBig" class="tool" type="button" aria-pressed="false">가+ 큰 글씨</button>
+      <button id="btnSummary" class="tool tool-accent" type="button">한 장 요약</button>
+      <button id="btnBackup" class="tool" type="button">백업</button>
+      <button id="btnRestore" class="tool" type="button">불러오기</button>
+      <input id="fileRestore" type="file" accept="application/json,.json" hidden>
+    </div>
+  </div>
+  <nav class="tabs" id="tabs" aria-label="구역 이동">
+    <button class="tab is-active" data-tab="cover" type="button">① 표지·통계</button>
+    <button class="tab" data-tab="prep" type="button">② 준비·미확정</button>
+    <button class="tab" data-tab="days" type="button">③ 일정·기록</button>
+    <button class="tab" data-tab="comp" type="button">④ 수영대회</button>
+    <button class="tab" data-tab="codes" type="button">⑤ 예약 코드</button>
+  </nav>
+</header>
+
+<main>
+
+  <!-- ① 표지 & 통계 -->
+  <section class="panel is-active" id="panel-cover">
+    <div class="hero">
+      <p class="eyebrow">Lifetime Travel Log</p>
+      <h1>김상진님의 평생 여행 로그</h1>
+      <p class="lede">수영대회와 여행으로 다녀온 곳을 세계 지도에 하나씩 색칠해 갑니다. 지도와 숫자는 아래에 적은 기록에서 자동으로 다시 계산됩니다.</p>
+    </div>
+
+    <div class="card mapcard">
+      <div class="mapwrap" id="mapwrap">
+        <div class="mapempty">지도를 그리는 중…</div>
+      </div>
+      <div class="legend" id="mapLegend"></div>
+      <p class="source">지도: Natural Earth 110m 국가 경계(퍼블릭 도메인) · Robinson 도법 · 태평양 중심. 싱가포르는 세계 지도 축척에서 보이지 않아 점과 확대 원으로 표시합니다.</p>
+    </div>
+
+    <h2 class="sect">한눈에 보는 기록</h2>
+    <div class="statgrid" id="stats"></div>
+
+    <h2 class="sect">다음 대회까지</h2>
+    <div class="stack" id="dday"></div>
+
+    <h2 class="sect">색칠된 나라와 핀</h2>
+    <div class="tablewrap">
+      <table class="tbl" id="countryTable"></table>
+    </div>
+
+    <h2 class="sect">여행 목록</h2>
+    <div class="stack" id="trips"></div>
+
+    <div class="callout">
+      <strong>이 페이지는 공개 주소입니다.</strong>
+      여권번호·개인 휴대폰 번호·숙소 상세 주소(호실·출입정보)·예약 코드는 이 사이트에 올리지 않았습니다. 비상 연락처는 공개된 긴급·영사 번호만 실었고, 숙소는 도시·지역명까지만 적었습니다. 예약 코드는 ⑤번에서 <em>내 기기에만</em> 저장됩니다.
+    </div>
+  </section>
+
+  <!-- ② 미확정 & 체크리스트 & 비상정보 -->
+  <section class="panel" id="panel-prep">
+    <h2 class="sect first">아직 안 정해진 일</h2>
+    <p class="hint">끝난 항목은 체크해 두세요. 체크 상태는 이 기기에 저장됩니다.</p>
+    <div class="stack" id="todos"></div>
+
+    <h2 class="sect">준비물 체크리스트</h2>
+    <div class="stack" id="checklist"></div>
+    <div class="checkbar"><span id="checkProgress">0 / 0</span><button id="btnCheckReset" class="tool" type="button">체크 모두 지우기</button></div>
+
+    <h2 class="sect">비상 정보</h2>
+    <div class="callout strong">
+      <strong>생명이 위급할 때 먼저</strong>
+      호주는 <b>000</b>(경찰·화재·구급, 휴대폰은 112도 가능), 싱가포르는 <b>999</b>(경찰)·<b>995</b>(구급·화재). 그다음 영사안전콜센터 <b>+82-2-3210-0404</b>로 연락하면 통역과 영사 조력을 받을 수 있습니다.
+    </div>
+    <div class="tablewrap"><table class="tbl" id="emergencyTable"></table></div>
+    <h3 class="sub">영사 도움 받는 곳</h3>
+    <ul class="plain" id="consular"></ul>
+    <h3 class="sub">숙소 (도시·지역만)</h3>
+    <div class="tablewrap"><table class="tbl" id="lodgingTable"></table></div>
+    <div class="callout">
+      <strong>여행자보험</strong>
+     2026-11-16 기준 가입 확인 없음. 스카이다이빙·하버브리지 등반 보장 여부를 정하려면 출발 전 가입이 필요합니다.
+    </div>
+  </section>
+
+  <!-- ③ 일정 & 날짜별 기록 -->
+  <section class="panel" id="panel-days">
+    <h2 class="sect first">11/19 ~ 11/28 · 날짜별 일정</h2>
+    <p class="hint">각 날짜의 <b>실제로 있었던 일</b>을 직접 적고, 사진을 최대 5장 붙이고, 대표사진을 고를 수 있습니다. 입력은 이 기기에 자동 저장됩니다.</p>
+    <div class="stack" id="days"></div>
+  </section>
+
+  <!-- ④ 수영대회 -->
+  <section class="panel" id="panel-comp">
+    <h2 class="sect first">수영대회 기록</h2>
+    <p class="hint">완주 시간을 적으면 거리별 추이와 누적 거리가 표지에서 다시 계산됩니다. 모르는 값은 비워 두세요.</p>
+    <div class="stack" id="comps"></div>
+
+    <h2 class="sect">거리별 최고 기록</h2>
+    <div class="tablewrap"><table class="tbl" id="distTable"></table></div>
+
+    <h2 class="sect">거리 추이</h2>
+    <div class="card"><div id="trendChart" class="chart"></div></div>
+
+    <h2 class="sect">누적 거리</h2>
+    <div class="card big-number"><span id="totalKm">0</span><small>km · 완주 기록 합계</small></div>
+  </section>
+
+  <!-- ⑤ 예약 코드 -->
+  <section class="panel" id="panel-codes">
+    <h2 class="sect first">예약 코드</h2>
+    <div class="callout strong">
+      <strong>코드는 이 기기에만 저장됩니다.</strong>
+      이 페이지는 누구나 열 수 있는 공개 주소라 예약번호(PNR)·등록번호를 사이트에 넣지 않았습니다. 아래 칸에 한 번 적어 두면 이 브라우저에만 저장되고, 버튼 한 번으로 복사됩니다. 다른 기기에서는 다시 적거나 ③의 백업 파일을 불러오세요.
+    </div>
+    <div class="stack" id="codes"></div>
+    <p class="hint">적어 둔 코드가 있는 항목은 <b>복사</b> 버튼으로 바로 클립보드에 담깁니다.</p>
+  </section>
+
+</main>
+
+<footer class="foot">
+  <p>김상진님의 평생 여행 로그 · 기록 원칙: 확인된 값만 적고, 모르는 값은 비워 둡니다.</p>
+</footer>
+
+<!-- 한 장 요약 모달 -->
+<div class="modal" id="summaryModal" role="dialog" aria-modal="true" aria-labelledby="summaryTitle" hidden>
+  <div class="modal-card">
+    <button class="modal-close" id="btnCloseSummary" type="button" aria-label="닫기">×</button>
+    <div id="summaryBody"></div>
+    <div class="modal-actions">
+      <button class="tool tool-accent" id="btnCopySummary" type="button">글 복사</button>
+      <button class="tool" id="btnPrintSummary" type="button">인쇄 / PDF</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="world.js"></script>
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
