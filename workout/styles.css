@@ -122,8 +122,8 @@ section{scroll-margin-top:6.4rem}
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.22rem}
 .cw{font-size:.7rem;font-weight:800;color:#93A09A;text-align:center;padding:.1rem 0 .2rem}
 .cw.sun{color:#C08272}
-.cblank{min-height:2.7rem}
-.cday{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;min-height:2.7rem;padding:.2rem 0;border-radius:11px;border:1px solid #EDF2F0;background:#F8FBFA;color:#33414D;font-family:inherit;font-size:.94rem;font-weight:800;line-height:1;-webkit-tap-highlight-color:transparent}
+.cblank{min-height:2.8rem}
+.cday{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.22rem;min-height:2.8rem;padding:.25rem 0;border-radius:11px;border:1px solid #EDF2F0;background:#F8FBFA;color:#33414D;font-family:inherit;font-size:.94rem;font-weight:800;line-height:1;-webkit-tap-highlight-color:transparent}
 .cday .dn{font-variant-numeric:tabular-nums}
 .cday .dots{display:flex;gap:.16rem;height:.36rem;align-items:center}
 .cday .dots i{width:.34rem;height:.34rem;border-radius:50%;display:block}
@@ -181,7 +181,7 @@ button.cday:active{transform:scale(.95)}
 .pbar .pfill{display:block;height:100%;border-radius:999px}
 .pbar.mine .pfill{background:var(--teal)}
 .pbar.mine .pn{color:var(--teal)}
-.pbar.bud .pfill{background:#9CC3B5}
+.pbar.bud .pfill{background:#7FB3A2}
 .pbar.doha .pfill{background:var(--blue)}
 .pbar .pnote{grid-column:1/-1;font-size:.7rem;color:#8A9691;font-weight:700}
 .pace-legend{font-size:.72rem;color:#8A9691;margin:.5rem 0 .1rem}
@@ -284,7 +284,7 @@ button.cday:active{transform:scale(.95)}
 /* 코치가 전하는 말 */
 .coach{margin:.5rem 0 0;background:#F2F7F5;border-left:4px solid var(--teal);border-radius:10px;padding:.5rem .6rem}
 .coach .ch{display:flex;align-items:center;gap:.3rem;font-size:.74rem;font-weight:800;color:var(--teal);letter-spacing:.01em}
-.coach p{margin:.22rem 0 0;font-size:.87rem;color:#2A4A42;line-height:1.5}
+.coach p{margin:.22rem 0 0;font-size:.9rem;color:#22423A;line-height:1.52}
 /* 날짜 선택 시 잠초 강조 */
 .rec.flash{outline:3px solid var(--amber);outline-offset:2px;box-shadow:0 0 0 6px rgba(233,162,59,.16),var(--shadow)}
 .lbl{display:block;font-size:.72rem;font-weight:800;color:var(--muted);margin:.55rem 0 .2rem;letter-spacing:.02em}
