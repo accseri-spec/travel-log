@@ -246,6 +246,7 @@
       svg.push("<line x1=\"" + m.l + "\" y1=\"" + ay.toFixed(1) + "\" x2=\"" + (W - m.r) + "\" y2=\"" + ay.toFixed(1) +
         "\" stroke=\"#E9A23B\" stroke-width=\"1.4\" stroke-dasharray=\"4 3\" opacity=\".9\"/>");
     }
+    var placedLabels = [];
     items.forEach(function (it, i) {
       var cx = m.l + slot * i + slot / 2;
       var h = it.value <= 0 ? 0 : Math.max(2, ph * (it.value / max));
@@ -256,7 +257,22 @@
         (it.hl ? " stroke=\"#0F352E\" stroke-width=\"1.5\"" : "") + "/>");
       if (it.value > 0) {
         var lbl = opts.decimals ? (Math.round(it.value * 10) / 10) : Math.round(it.value);
-        svg.push("<text class=\"barlabel\" x=\"" + cx.toFixed(1) + "\" y=\"" + (y - 5).toFixed(1) + "\" text-anchor=\"middle\">" + lbl + "</text>");
+        var lblText = String(lbl);
+        // 좁은 화면에서 이웃 막대 숫자가 겹치지 않도록 필요한 만큼만 위로 한 줄씩 엇갈려 놓는다
+        var lblW = lblText.length * 5.6 + 3;
+        var dy = 0;
+        var rows = [0, -11, -22];
+        for (var r = 0; r < rows.length; r++) {
+          var free = true;
+          for (var p = 0; p < placedLabels.length; p++) {
+            var o = placedLabels[p];
+            if (o.dy === rows[r] && Math.abs(o.cx - cx) < (o.w + lblW) / 2 + 1) { free = false; break; }
+          }
+          if (free) { dy = rows[r]; break; }
+          dy = rows[r];
+        }
+        placedLabels.push({ cx: cx, w: lblW, dy: dy });
+        svg.push("<text class=\"barlabel\" x=\"" + cx.toFixed(1) + "\" y=\"" + (y - 5 + dy).toFixed(1) + "\" text-anchor=\"middle\">" + lblText + "</text>");
       }
       svg.push("<text class=\"ticklabel\" x=\"" + cx.toFixed(1) + "\" y=\"" + (H - 9) + "\" text-anchor=\"middle\">" + esc(it.label) + "</text>");
       // 터치/호버 영역
