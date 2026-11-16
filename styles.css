@@ -83,6 +83,7 @@ main{max-width:60rem;margin:0 auto;padding:.8rem .7rem 2rem}
 .mapcard{padding:.5rem .5rem .7rem}
 .mapwrap{width:100%;background:#DCEBF4;border-radius:12px;overflow:hidden}
 .mapwrap svg{display:block;width:100%;height:auto}
+.map-hint{display:none;color:var(--muted);font-size:.72rem;margin:.35rem .2rem 0}
 .mapempty{color:#54687A;font-size:.85rem;text-align:center;padding:2.5rem .5rem}
 .legend{display:flex;flex-wrap:wrap;gap:.6rem .95rem;margin:.6rem .2rem .2rem;font-size:.78rem;color:var(--ink)}
 .legend i{width:.85rem;height:.85rem;border-radius:3px;display:inline-block;vertical-align:-.1rem;margin-right:.3rem;border:1px solid rgba(0,0,0,.08)}
@@ -218,6 +219,11 @@ ul.plain{margin:.3rem 0 .6rem;padding-left:1.1rem;font-size:.85rem;color:var(--i
 ul.plain li{margin:.18rem 0}
 
 /* 좎은 폰 (390px 안팍) */
+@media(max-width:34rem){
+  .mapwrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .mapwrap svg{width:720px;max-width:none}
+  .map-hint{display:block}
+}
 @media(max-width:26rem){
   .topbar{padding:.45rem .55rem .3rem}
   .brand{font-size:.95rem}
