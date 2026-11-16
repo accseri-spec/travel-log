@@ -925,7 +925,7 @@
       card.querySelector(".certwrap").appendChild(photoBlock({
         list: st.certs, max: 5, label: "완주증 · 메달 (최대 5장)",
         caption: (c.name || "대회") + " 완주증·메달",
-        after: function () { save(true); renderStats(); }
+        after: function () { save(true); renderComps(); renderStats(); }
       }));
       card.querySelector(".phostack").appendChild(photoBlock({
         list: st.photos, max: 5, label: "대회 사진",
