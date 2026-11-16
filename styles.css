@@ -275,7 +275,7 @@ textarea:focus,input:focus,select:focus{outline:2px solid rgba(47,125,107,.35);o
 
 /* ---------- 대회 카드: 날짜·대회명 간격과 날씨 표시 ---------- */
 .fieldrow{display:grid;grid-template-columns:minmax(8.4rem,.85fr) minmax(0,1.15fr);gap:.75rem 1rem;align-items:end;margin-top:.55rem}
-@media(max-width:30rem){.fieldrow{grid-template-columns:1fr;gap:.45rem}}
+@media(max-width:30rem){.fieldrow{grid-template-columns:1fr;gap:.6rem}}
 .fieldrow .lbl{margin-top:0}
 .grid2{gap:.65rem 1rem}
 .wxline{
@@ -332,7 +332,7 @@ ul.plain li{margin:.18rem 0}
 /* 좁은 폰 (390px 안팎) */
 @media(max-width:34rem){
   .mapwrap{border-radius:10px}
-  .mapbtn{width:1.95rem;height:1.95rem;font-size:.98rem}
+  .mapbtn{width:2.15rem;height:2.15rem;font-size:1.02rem}
 }
 @media(max-width:26rem){
   .topbar{padding:.45rem .55rem .3rem}
