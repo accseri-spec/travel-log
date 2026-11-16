@@ -804,7 +804,7 @@
       if (/비|이슬비/.test(String(d.weather || ""))) ic += '<i class="cal-ico rain">☂</i>';
       html += '<button type="button" class="' + cls + '" data-date="' + date + '" aria-label="' +
         esc(date.slice(5).replace("-", "/") + " " + d.title) + ' — 그날 기록으로 이동">' +
-        "<b>" + day + "</b>" + ic + "</button>";
+        "<b>" + day + "</b>" + (ic ? '<span class="cal-ics">' + ic + "</span>" : "") + "</button>";
     }
     host.innerHTML = html;
     $$("[data-date]", host).forEach(function (b) {
