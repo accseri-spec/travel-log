@@ -11,7 +11,7 @@
     strength: { name: "근력", icon: "🏋️" }
   };
   var DOW = ["일", "월", "화", "수", "목", "금", "토"];
-  var state = { memos: {}, manual: [], big: false, filter: "all" };
+  var state = { memos: {}, manual: [], big: false, filter: "all", selDay: null };
 
   /* ---------------- 저장 ---------------- */
   function load() {
@@ -124,67 +124,216 @@
       "마지막 동기화 " + D.meta.syncedAt + " · " + D.meta.source + " · " + D.meta.autoSync + " · 기간 " + D.meta.coverage;
   }
 
-  function renderDday() {
+  function ddText(d) { return d > 0 ? "D-" + d : (d === 0 ? "D-DAY" : "D+" + (-d)); }
+
+  /* 대회 D-day — 평상시엔 이름과 D-day만, 누르면 상세가 펼쳐집니다 */
+  function renderRaces() {
     var today = todayKST();
-    var race = parseDate(D.race.date);
-    var d = daysBetween(today, race);
-    document.getElementById("raceName").textContent = D.race.name;
-    document.getElementById("raceMeta").textContent =
-      D.race.date.replace(/-/g, ".") + (D.race.endDate ? "~" + D.race.endDate.slice(8) : "") +
-      " · " + D.race.place + " · " + D.race.division;
-    document.getElementById("ddayValue").textContent = d > 0 ? "D-" + d : (d === 0 ? "D-DAY" : "D+" + (-d));
-    document.getElementById("ddayLabel").textContent = d > 0 ? "대회까지" : "대회일";
+    var open = -1;
+    D.races.forEach(function (r, i) {
+      if (open < 0 && daysBetween(today, parseDate(r.date)) >= 0) open = i;
+    });
+    var html = D.races.map(function (r, i) {
+      var d = daysBetween(today, parseDate(r.date));
+      var det = (r.detail || []).map(function (row) {
+        return "<div class=\"rrow\"><span class=\"rk\">" + esc(row[0]) + "</span><span class=\"rv\">" + row[1] + "</span></div>";
+      }).join("");
+      var prep = "";
+      if (r.prep) {
+        var start = parseDate(D.meta.coverage.split(" ~ ")[0].replace(/\./g, "-").slice(0, 10));
+        var total = daysBetween(start, parseDate(r.date)) || 1;
+        var done = Math.max(0, Math.min(1, daysBetween(start, today) / total));
+        prep = "<div class=\"prep\"><div class=\"prep-bar\"><i style=\"width:" + (done * 100).toFixed(1) + "%\"></i></div>" +
+          "<p class=\"hint\">준비 " + int(total) + "일 중 " + Math.round(done * 100) + "% 지남 · 한국 날짜 기준</p></div>";
+      }
+      return "<div class=\"race" + (i === open ? " is-next" : "") + "\">" +
+        "<button class=\"race-btn\" type=\"button\" aria-expanded=\"false\">" +
+          "<span class=\"race-nm\">" + esc(r.short || r.name) + "</span>" +
+          "<span class=\"race-dday\"><b>" + ddText(d) + "</b><span class=\"chev\"></span></span>" +
+        "</button>" +
+        "<div class=\"race-det\">" + det + prep + "</div>" +
+      "</div>";
+    }).join("");
 
-    var start = parseDate(D.meta.coverage.split(" ~ ")[0].replace(/\./g, "-").slice(0, 10));
-    var total = daysBetween(start, race) || 1;
-    var done = Math.max(0, Math.min(1, daysBetween(start, today) / total));
-    document.getElementById("ddayBar").style.width = (done * 100).toFixed(1) + "%";
-    document.getElementById("ddayHint").textContent =
-      "준비 기간 " + int(total) + "일 중 " + Math.round(done * 100) + "% 지남 · 3,000 m 오픈워터 · 한국 날짜 기준";
-
-    var nd = daysBetween(today, parseDate(D.next.date));
-    document.getElementById("nextRace").innerHTML =
-      "가까운 대회 <b>" + esc(D.next.name) + "</b> · " + D.next.date.replace(/-/g, ".") + " · " + esc(D.next.place) +
-      "<span class=\"pill\">" + (nd > 0 ? "D-" + nd : "오늘") + "</span>";
-
-    document.getElementById("targetText").innerHTML =
-      "메달권 <b>" + esc(D.race.goalTime) + "</b> (" + esc(D.race.goalPace) + ", " + esc(D.race.goalBasis) + ")" +
-      " vs 내 1,500 m <b>" + esc(D.race.myPace) + "</b> — 이미 <b>" + esc(D.race.gap) + "</b>. " +
-      "남은 과제는 " + esc(D.race.task) + "입니다.";
+    var box = document.getElementById("raceList");
+    if (!box) return;
+    box.innerHTML = html;
+    Array.prototype.forEach.call(box.querySelectorAll(".race-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        var card = btn.parentNode;
+        var isOpen = card.classList.toggle("is-open");
+        btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      });
+    });
   }
 
+  /* 이번 달 합계 */
+  function tcell(k, v, unit) {
+    return "<div class=\"tcell\"><div class=\"k\">" + k + "</div><div class=\"v\">" + v +
+      (unit ? "<small>" + unit + "</small>" : "") + "</div></div>";
+  }
+  function renderMonthTotal() {
+    var t = monthTotals("2026-11");
+    var el = document.getElementById("monthTotal");
+    if (!el) return;
+    el.innerHTML =
+      "<div class=\"totalhead\"><span>이번 달 합계</span><em>11월 · 1~16일</em></div>" +
+      "<div class=\"tgrid\">" +
+        tcell("총 거리", km(t.swim.km + t.run.km), "km") +
+        tcell("운동 시간", fmtDur(t.seconds), "") +
+        tcell("칼로리", int(t.kcal), "kcal") +
+      "</div>" +
+      "<p class=\"tn\">수영 " + t.swim.n + "회 " + km(t.swim.km) + " km · 러닝 " + t.run.n + "회 " +
+        km(t.run.km) + " km · 근력 " + t.strength + "회</p>";
+  }
+
+  /* 이번 달 / 지난 주 / 최근 30일 — 작은 여닫이 */
   function renderWindows() {
-    var box = document.getElementById("windowStats");
     var nov = monthTotals("2026-11");
-    var html = D.windows.map(function (w) {
+    var box = document.getElementById("windowAcc");
+    if (!box) return;
+    box.innerHTML = D.windows.map(function (w) {
       var isMonth = w.label === "이번 달";
       var swim = isMonth ? nov.swim : w.swim;
       var run = isMonth ? nov.run : w.run;
       var st = isMonth ? nov.strength : w.strength;
-      return "<div class=\"stat\">" +
-        "<div class=\"k\">" + esc(w.label) + " <em>" + esc(w.sub) + "</em></div>" +
-        "<div class=\"rows\">" +
-        rowLine("🏊 수영", swim.n + "회", km(swim.km) + " km") +
-        rowLine("🏃 러닝", run.n + "회", km(run.km) + " km") +
-        rowLine("🏋️ 근력", st + "회", "") +
+      return "<div class=\"acc-item\">" +
+        "<button class=\"acc-btn\" type=\"button\" aria-expanded=\"false\">" +
+          "<span class=\"ak\">" + esc(w.label) + "</span>" +
+          "<span class=\"as\">" + esc(w.sub || "") + "</span>" +
+          "<span class=\"chev\"></span>" +
+        "</button>" +
+        "<div class=\"acc-body\">" +
+          "<div class=\"arow\"><span class=\"an\">🏊 수영</span><span class=\"av\">" + swim.n + "회 · " + km(swim.km) + " km</span></div>" +
+          "<div class=\"arow\"><span class=\"an\">🏃 러닝</span><span class=\"av\">" + run.n + "회 · " + km(run.km) + " km</span></div>" +
+          "<div class=\"arow\"><span class=\"an\">🏋️ 근력</span><span class=\"av\">" + st + "회</span></div>" +
+          (w.note ? "<p class=\"anote\">" + esc(w.note) + "</p>" : "") +
         "</div>" +
-        (w.note ? "<div class=\"n\">" + esc(w.note) + "</div>" : "") +
-        "</div>";
-    }).join("");
-    html += "<div class=\"stat\">" +
-      "<div class=\"k\">이번 달 합계 <em>11월</em></div>" +
-      "<div class=\"rows\">" +
-      rowLine("총 거리", "", km(nov.swim.km + nov.run.km) + " km") +
-      rowLine("운동 시간", "", fmtDur(nov.seconds)) +
-      rowLine("칼로리", "", int(nov.kcal) + " kcal") +
-      "</div>" +
-      "<div class=\"n\">수영 " + nov.swim.n + "회 · 러닝 " + nov.run.n + "회 · 근력 " + nov.strength + "회 (11/1~11/16)</div>" +
       "</div>";
-    box.innerHTML = html;
+    }).join("");
+    Array.prototype.forEach.call(box.querySelectorAll(".acc-btn"), function (btn) {
+      btn.addEventListener("click", function () {
+        var item = btn.parentNode;
+        var isOpen = item.classList.toggle("is-open");
+        btn.setAttribute("aria-expanded", isOpen ? "true" : "false");
+      });
+    });
   }
-  function rowLine(name, a, b) {
-    var head = a ? a + (b ? " <small>·</small> " : "") : "";
-    return "<div class=\"row\"><span class=\"name\">" + name + "</span><span class=\"val\">" + head + b + "</span></div>";
+
+  /* 11월 달력 — 운동한 날은 종목 색 점으로 표시 */
+  function renderCalendars() {
+    var recs = allRecords();
+    renderCal(document.getElementById("calSummary"), "2026-11", recs, { interactive: false });
+    renderCal(document.getElementById("calRecords"), "2026-11", recs, { interactive: true });
+  }
+
+  function renderCal(el, prefix, recs, opts) {
+    if (!el) return;
+    var p = prefix.split("-");
+    var y = +p[0], mo = +p[1];
+    var daysInMonth = new Date(y, mo, 0).getDate();
+    var firstDow = new Date(y, mo - 1, 1).getDay();
+    var byDate = {};
+    recs.forEach(function (r) {
+      if (r.date.slice(0, 7) !== prefix) return;
+      var o = byDate[r.date] || (byDate[r.date] = {});
+      o[r.sport] = (o[r.sport] || 0) + 1;
+    });
+    var known = {};
+    D.days.forEach(function (d) { known[d.date] = true; });
+    var today = todayKST();
+
+    var html = DOW.map(function (w, i) {
+      return "<div class=\"cw" + (i === 0 ? " sun" : "") + "\">" + w + "</div>";
+    }).join("");
+    for (var b = 0; b < firstDow; b++) html += "<div class=\"cblank\"></div>";
+
+    for (var d = 1; d <= daysInMonth; d++) {
+      var ds = prefix + "-" + pad(d);
+      var sp = byDate[ds];
+      var dt = new Date(y, mo - 1, d);
+      var isToday = daysBetween(dt, today) === 0;
+      var isFuture = dt > today;
+      var cls = (sp ? "is-rec" : (isFuture ? "is-future" : "is-empty")) +
+        (isToday ? " is-today" : "") + (state.selDay === ds ? " is-sel" : "");
+      var dots = "<span class=\"dots\"></span>";
+      if (sp) {
+        dots = "<span class=\"dots\">" + ["swim", "run", "strength"].filter(function (k) { return sp[k]; })
+          .map(function (k) { return "<i class=\"" + k + "\"></i>"; }).join("") + "</span>";
+      }
+      var inner = "<span class=\"dn\">" + d + "</span>" + dots;
+      var clickable = opts.interactive && !isFuture && !!(sp || known[ds]);
+      if (clickable) {
+        html += "<button class=\"cday " + cls + "\" type=\"button\" data-date=\"" + ds +
+          "\" aria-pressed=\"" + (state.selDay === ds ? "true" : "false") +
+          "\" aria-label=\"" + mo + "월 " + d + "일 · " + (sp ? "기록 있음" : "기록 없음") + "\">" + inner + "</button>";
+      } else {
+        html += "<div class=\"cday " + cls + "\">" + inner + "</div>";
+      }
+    }
+    el.innerHTML = html;
+
+    if (opts.interactive) {
+      el.onclick = function (e) {
+        var btn = e.target && e.target.closest ? e.target.closest("button.cday[data-date]") : null;
+        if (btn) jumpToDay(btn.getAttribute("data-date"));
+      };
+    }
+  }
+
+  /* 달력에서 날짜를 누르면 그날 기록 카드로 이동 + 잠깐 강조 */
+  function jumpToDay(ds) {
+    state.selDay = ds;
+    Array.prototype.forEach.call(document.querySelectorAll("#calRecords button.cday[data-date]"), function (b) {
+      var on = b.getAttribute("data-date") === ds;
+      b.classList.toggle("is-sel", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    var card = document.querySelector("#recordList .rec[data-date=\"" + ds + "\"]");
+    if (!card && state.filter !== "all") {
+      state.filter = "all";
+      syncFilterChips();
+      save();
+      renderRecords();
+      card = document.querySelector("#recordList .rec[data-date=\"" + ds + "\"]");
+    }
+    if (!card) card = document.querySelector("#emptyDays .rec[data-date=\"" + ds + "\"]");
+    if (!card) return;
+    card.scrollIntoView({ behavior: "smooth", block: "center" });
+    highlightCard(card);
+  }
+  var flashTimer;
+  function highlightCard(card) {
+    Array.prototype.forEach.call(document.querySelectorAll(".rec.flash"), function (c) { c.classList.remove("flash"); });
+    card.classList.add("flash");
+    clearTimeout(flashTimer);
+    flashTimer = setTimeout(function () { card.classList.remove("flash"); }, 2600);
+  }
+
+  /* 3K 메달권 페이스 비교 바 (1,500 m 내 기록 vs 메달권) */
+  function paceText(sec) {
+    var m = Math.floor(sec / 60);
+    var s = sec - m * 60;
+    var t = (Math.round(s * 10) / 10).toFixed(1);
+    return m + ":" + (s < 10 ? "0" + t : t);
+  }
+  function renderPaceBars() {
+    var box = document.getElementById("paceBars");
+    if (!box) return;
+    var rows = [
+      { key: "mine", name: "내 1,500 m 최고", sec: 90.1, note: "1:30.1 /100m · 22:32 (2026-11-11)" },
+      { key: "bud", name: "2017 부다페스트 메달권", sec: 91.5, note: "1:31.5 /100m · 45:42~45:47 (3,000 m)" },
+      { key: "doha", name: "2024 도하 메달권", sec: 81.2, note: "1:21.2 /100m · 40:35 (3,000 m 3위)" }
+    ];
+    box.innerHTML = rows.map(function (r) {
+      var w = Math.max(6, Math.min(100, r.sec / 100 * 100));
+      return "<div class=\"pbar " + r.key + "\">" +
+        "<span class=\"pn\">" + r.name + "</span>" +
+        "<span class=\"pv\">" + paceText(r.sec) + "</span>" +
+        "<span class=\"ptrack\"><i class=\"pfill\" style=\"width:" + w.toFixed(1) + "%\"></i></span>" +
+        "<span class=\"pnote\">" + r.note + "</span>" +
+      "</div>";
+    }).join("");
   }
 
   /* ---------------- ② 차트 ---------------- */
@@ -409,7 +558,8 @@
       (r.hrAvg ? numCell("심박 평균/최대", r.hrAvg + (r.hrMax ? "/" + r.hrMax : ""), "bpm") : "");
 
     var memo = state.memos[r.id] || "";
-    return "<article class=\"rec" + (r.manual ? " manual" : "") + "\" data-id=\"" + esc(r.id) + "\" data-sport=\"" + esc(r.sport) + "\">" +
+    return "<article class=\"rec" + (r.manual ? " manual" : "") + "\" data-id=\"" + esc(r.id) +
+      "\" data-date=\"" + esc(r.date) + "\" data-sport=\"" + esc(r.sport) + "\">" +
       "<div class=\"rec-head\">" +
         "<div class=\"rec-date\"><div class=\"d\">" + esc(mmdd(r.date)) + "</div><div class=\"w\">" + dowOf(r.date) + "</div></div>" +
         "<div style=\"flex:1;min-width:0\">" +
@@ -423,6 +573,7 @@
         "<div class=\"nums\">" + cells + "</div>" +
         (r.extra ? "<p class=\"extra\">" + esc(r.extra) + "</p>" : "") +
         (r.fact ? "<p class=\"fact\">" + esc(r.fact) + "</p>" : "") +
+        (r.coach ? "<div class=\"coach\"><div class=\"ch\">🧑‍🏫 코치가 전하는 말</div><p>" + esc(r.coach) + "</p></div>" : "") +
         "<label class=\"lbl\" for=\"memo-" + esc(r.id) + "\">컨디션 메모" +
           "<span class=\"note-saved\" id=\"saved-" + esc(r.id) + "\">저장됨</span></label>" +
         "<textarea id=\"memo-" + esc(r.id) + "\" data-memo=\"" + esc(r.id) + "\" rows=\"2\" " +
@@ -491,7 +642,7 @@
     if (!empty.length) { box.innerHTML = "<div class=\"card empty\">11/1~11/16 모든 날에 기록이 있습니다.</div>"; return; }
     box.innerHTML = empty.map(function (d) {
       var id = "day-" + d.date;
-      return "<article class=\"rec\" data-sport=\"-\">" +
+      return "<article class=\"rec\" data-date=\"" + esc(d.date) + "\" data-sport=\"-\">" +
         "<div class=\"rec-head\">" +
           "<div class=\"rec-date\"><div class=\"d\">" + esc(mmdd(d.date)) + "</div><div class=\"w\">" + d.dow + "</div></div>" +
           "<div style=\"flex:1;min-width:0\"><div class=\"rec-sub\" style=\"margin-top:.35rem\">운동 기록 없음 · 그날 몸 상태나 이유를 한 줄</div></div>" +
@@ -504,17 +655,22 @@
   }
 
   /* ---------------- 필터 ---------------- */
+  function syncFilterChips() {
+    Array.prototype.forEach.call(document.querySelectorAll("#filters .chip"), function (c) {
+      var on = c.getAttribute("data-sport") === state.filter;
+      c.classList.toggle("is-active", on);
+      c.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+  }
   function bindFilters() {
     Array.prototype.forEach.call(document.querySelectorAll("#filters .chip"), function (chip) {
       chip.addEventListener("click", function () {
         state.filter = chip.getAttribute("data-sport");
-        Array.prototype.forEach.call(document.querySelectorAll("#filters .chip"), function (c) {
-          c.classList.toggle("is-active", c === chip);
-        });
+        syncFilterChips();
         save(); renderRecords();
       });
-      chip.classList.toggle("is-active", chip.getAttribute("data-sport") === state.filter);
     });
+    syncFilterChips();
   }
 
   /* ---------------- 새 운동 추가 ---------------- */
@@ -649,10 +805,13 @@
   /* ---------------- 시작 ---------------- */
   function renderAll() {
     renderHeader();
-    renderDday();
+    renderRaces();
+    renderCalendars();
+    renderMonthTotal();
     renderWindows();
     renderCharts();
     renderPR();
+    renderPaceBars();
     renderMonthSum();
     renderRecords();
     updateStorageLine();
