@@ -296,6 +296,7 @@
     var VB = { x: 0, y: 0, w: W, h: H };
     var MIN_W = W / 7;          /* 최대 약 7배까지 */
     var pts = {}, dragging = false, last = null, pinch = null;
+    var anim = 0, vel = null, velT = 0, lastMoveT = 0;
 
     function apply() {
       svg.setAttribute("viewBox", VB.x.toFixed(2) + " " + VB.y.toFixed(2) + " " + VB.w.toFixed(2) + " " + VB.h.toFixed(2));
@@ -316,6 +317,7 @@
     }
     function zoomAt(cx, cy, factor) {
       if (!isFinite(factor) || factor <= 0) return;
+      stopAnim(); vel = null;
       var nw = Math.max(MIN_W, Math.min(W, VB.w / factor));
       var nh = nw * (H / W);
       var fx = VB.w ? (cx - VB.x) / VB.w : 0.5;
@@ -325,7 +327,7 @@
       VB.w = nw; VB.h = nh;
       clampView(); apply();
     }
-    function reset() { VB.x = 0; VB.y = 0; VB.w = W; VB.h = H; apply(); }
+    function reset() { stopAnim(); vel = null; VB.x = 0; VB.y = 0; VB.w = W; VB.h = H; apply(); }
     function zoomCenter(factor) { zoomAt(VB.x + VB.w / 2, VB.y + VB.h / 2, factor); }
     function rect() { return svg.getBoundingClientRect(); }
     function toVb(clientX, clientY) {
@@ -359,15 +361,18 @@
 
     wrap.addEventListener("pointerdown", function (e) {
       if (e.pointerType === "mouse" && e.button !== 0) return;
+      stopAnim(); vel = null;
       pts[e.pointerId] = { x: e.clientX, y: e.clientY };
       var k = keys();
-      /* 터치는 한 손가락으로 페이지를 스크롤하고, 두 손가락으로만 지도를 옮깁니다 */
-      if (k.length === 1 && e.pointerType === "mouse") {
+      /* 한 손가락(터치·펜·마우스)은 지도를 끌어 옮기고, 두 손가락은 확대·축소입니다 */
+      if (k.length === 1) {
         dragging = true; last = { x: e.clientX, y: e.clientY }; pinch = null;
+        velT = lastMoveT = e.timeStamp;
         wrap.classList.add("is-drag");
         try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
       } else if (k.length === 2) {
         dragging = false; last = null; pinch = pinchState();
+        wrap.classList.remove("is-drag");
         try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
       }
     });
@@ -396,14 +401,81 @@
       if (dragging && last && k.length === 1) {
         var r = rect();
         if (!r.width || !r.height) return;
-        var dx = (e.clientX - last.x) / r.width * VB.w;
-        var dy = (e.clientY - last.y) / r.height * VB.h;
+        var pdx = e.clientX - last.x, pdy = e.clientY - last.y;
+        if (!pdx && !pdy) return;
         last = { x: e.clientX, y: e.clientY };
-        if (!dx && !dy) return;
-        VB.x -= dx; VB.y -= dy;
-        clampView(); apply();
+        trackVel(pdx, pdy, r, e.timeStamp);
+        panPixels(pdx, pdy, r);
       }
     });
+
+    /* 한 손가락 끌기: 손가락을 따라 지도가 움직이고, 가장자리에서는 고무줄처럼 조금만 밀립니다 */
+    function panPixels(pdx, pdy, r) {
+      VB.x = edge(VB.x - pdx / r.width * VB.w, W - VB.w, VB.w);
+      VB.y = edge(VB.y - pdy / r.height * VB.h, H - VB.h, VB.h);
+      apply();
+    }
+    function edge(v, hi, span) {
+      if (!(hi > 0)) hi = 0;        /* 1.0× 에서도 상하좌우로 살짝 밀립니다 */
+      if (v > hi) return hi + rubber(v - hi, span);
+      if (v < 0) return -rubber(-v, span);
+      return v;
+    }
+    function rubber(d, span) {
+      var lim = Math.max(4, span * 0.1);   /* 아무리 밀어도 한계의 10%까지만 */
+      return lim * (1 - 1 / (d / lim + 1));
+    }
+    function trackVel(pdx, pdy, r, ts) {
+      var dt = Math.max(1, Math.min(80, ts - velT));
+      vel = { x: -(pdx / r.width * VB.w) / dt, y: -(pdy / r.height * VB.h) / dt };
+      velT = lastMoveT = ts;
+    }
+    function stopAnim() { if (anim) { cancelAnimationFrame(anim); anim = 0; } }
+
+    /* 손을 떼면 경계 밖으로 나간 만큼 부드럽게 되돌립니다 */
+    function settle() {
+      stopAnim();
+      var tx = Math.max(0, Math.min(W - VB.w, VB.x));
+      var ty = Math.max(0, Math.min(H - VB.h, VB.y));
+      var sx = VB.x, sy = VB.y;
+      if (Math.abs(tx - sx) < 0.3 && Math.abs(ty - sy) < 0.3) { VB.x = tx; VB.y = ty; apply(); return; }
+      var t0 = 0;
+      function step(ts) {
+        if (!t0) t0 = ts;
+        var p = Math.min(1, (ts - t0) / 240);
+        var e2 = 1 - Math.pow(1 - p, 3);
+        VB.x = sx + (tx - sx) * e2;
+        VB.y = sy + (ty - sy) * e2;
+        apply();
+        anim = p < 1 ? requestAnimationFrame(step) : 0;
+      }
+      anim = requestAnimationFrame(step);
+    }
+
+    /* 확대한 상태에서는 손을 튕기듯 떼면 관성으로 조금 더 미끄러집니다 */
+    function fling() {
+      if (!vel) { settle(); return; }
+      var vx = vel.x, vy = vel.y, prev = 0; vel = null;
+      var cap = VB.w / 250;            /* 한 번 튕겨서 지도 폭의 절반을 넘지 않게 */
+      var sp = Math.hypot(vx, vy);
+      if (sp > cap) { vx = vx / sp * cap; vy = vy / sp * cap; sp = cap; }
+      if (sp < 0.02) { settle(); return; }
+      function step(ts) {
+        var dt = prev ? Math.min(48, ts - prev) : 16; prev = ts;
+        var f = Math.pow(0.93, dt / 16);
+        vx *= f; vy *= f;
+        VB.x += vx * dt; VB.y += vy * dt;
+        var hiX = W - VB.w, hiY = H - VB.h;
+        if (VB.x < 0) { VB.x = 0; vx = 0; }
+        else if (VB.x > hiX) { VB.x = hiX; vx = 0; }
+        if (VB.y < 0) { VB.y = 0; vy = 0; }
+        else if (VB.y > hiY) { VB.y = hiY; vy = 0; }
+        apply();
+        if (Math.abs(vx) + Math.abs(vy) > 0.008) anim = requestAnimationFrame(step);
+        else { anim = 0; settle(); }
+      }
+      anim = requestAnimationFrame(step);
+    }
 
     function pointerEnd(e) {
       delete pts[e.pointerId];
@@ -412,9 +484,14 @@
       if (!k.length) {
         dragging = false; last = null;
         wrap.classList.remove("is-drag");
+        var still = e.timeStamp - lastMoveT;
+        if (e.type === "pointerup" && VB.w < W * 0.999 && still < 90) fling();
+        else { vel = null; settle(); }
       } else if (k.length === 1) {
         last = { x: pts[k[0]].x, y: pts[k[0]].y };
+        vel = null; velT = lastMoveT = e.timeStamp;
         dragging = true;
+        settle();
       }
     }
     wrap.addEventListener("pointerup", pointerEnd);
