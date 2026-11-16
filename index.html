@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0F352E">
 <meta name="description" content="김상진님의 평생 여행 로그 — 다녀온 나라·도시, 날짜별 기록과 사진, 수영대회 기록.">
 <title>김상진님의 평생 여행 로그</title>
-<link rel="stylesheet" href="styles.css?d=1">
+<link rel="stylesheet" href="styles.css?d=4">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%8F%3C/text%3E%3C/svg%3E">
 </head>
 <body>
@@ -42,10 +42,18 @@
     </div>
 
     <div class="card mapcard">
-      <div class="mapwrap" id="mapwrap">
-        <div class="mapempty">지도를 그리는 중…</div>
+      <div class="mapframe">
+        <div class="mapwrap" id="mapwrap">
+          <div class="mapempty">지도를 그리는 중…</div>
+        </div>
+        <div class="mapctrl" id="mapctrl">
+          <button id="btnMapZoomIn" class="mapbtn" type="button" aria-label="지도 확대">＋</button>
+          <button id="btnMapZoomOut" class="mapbtn" type="button" aria-label="지도 축소">−</button>
+          <button id="btnMapReset" class="mapbtn mapbtn-reset" type="button" aria-label="지도 처음 크기로">⟲</button>
+          <span class="mapzoom" id="mapZoomLevel" aria-live="polite">1.0×</span>
+        </div>
       </div>
-      <p class="map-hint">옆으로 넘기면 지도를 크게 볼 수 있어요</p>
+      <p class="map-hint">끌어서 옮기고, 두 손가락(마우스는 휠)로 확대·축소할 수 있어요 · <b>＋ − ⟲</b> 버튼도 됩니다</p>
       <div class="legend" id="mapLegend"></div>
       <p class="source">지도: Natural Earth 110m 국가 경계(퍼블릭 도메인) · Robinson 도법 · 태평양 중심. 싱가포르는 세계 지도 축척에서 보이지 않아 점과 확대 원으로 표시합니다.</p>
     </div>
@@ -99,14 +107,26 @@
   <!-- ③ 일정 & 날짜별 기록 -->
   <section class="panel" id="panel-days">
     <h2 class="sect first">11/19 ~ 11/28 · 날짜별 일정</h2>
-    <p class="hint">각 날짜의 <b>실제로 있었던 일</b>을 직접 적고, 사진을 최대 5장 붙이고, 대표사진을 고를 수 있습니다. 입력은 이 기기에 자동 저장됩니다.</p>
+    <p class="hint">달력에서 날짜를 누르면 그날 일정·날씨·일지·사진으로 바로 내려갑니다. 사진을 누르면 크게 볼 수 있습니다.</p>
+
+    <div class="card calcard" id="calCard">
+      <div class="cal-head">
+        <button class="cal-nav" id="calPrev" type="button" aria-label="이전 달">‹</button>
+        <div class="cal-title"><span id="calTitle">2026년 11월</span><span class="cal-sub">여행 11/19 ~ 11/28</span></div>
+        <button class="cal-nav" id="calNext" type="button" aria-label="다음 달">›</button>
+      </div>
+      <div class="cal-dow" id="calDow" aria-hidden="true"></div>
+      <div class="cal-grid" id="calGrid" role="group" aria-label="여행 달력"></div>
+      <p class="cal-hint">파란 테두리 날짜를 누르면 그날 기록으로 내려갑니다. <span class="cal-key race">◆</span> 대회일 · <span class="cal-key">☂</span> 비 예보</p>
+    </div>
+
     <div class="stack" id="days"></div>
   </section>
 
   <!-- ④ 수영대회 -->
   <section class="panel" id="panel-comp">
     <h2 class="sect first">수영대회 기록</h2>
-    <p class="hint">완주 시간을 적으면 거리별 추이와 누적 거리가 표지에서 다시 계산됩니다. 모르는 값은 비워 두세요.</p>
+    <p class="hint">완주 시간을 적으면 거리별 추이와 누적 거리가 표지에서 다시 계산됩니다. 모르는 값은 비워 두세요. 현지 날씨는 코코가 최신 예보로 채워 넣고(직접 입력하는 칸 없음), 완주증·메달 사진은 최대 5장까지 붙일 수 있습니다.</p>
     <div class="stack" id="comps"></div>
 
     <h2 class="sect">거리별 최고 기록</h2>
@@ -125,6 +145,10 @@
     <div class="callout strong">
       <strong>코드는 이 기기에만 저장됩니다.</strong>
       이 페이지는 누구나 열 수 있는 공개 주소라 예약번호(PNR)·등록번호를 사이트에 넣지 않았습니다. 아래 칸에 한 번 적어 두면 이 브라우저에만 저장되고, 버튼 한 번으로 복사됩니다. 다른 기기에서는 다시 적거나 ③의 백업 파일을 불러오세요.
+    </div>
+    <div class="callout">
+      <strong>코코에게 받은 링크로 한 번에 채우기</strong>
+      코코가 보내 드린 <code>…#codes=…</code> 링크를 이 기기에서 한 번 열면, 코드가 <em>이 기기에만</em> 저장되고 주소창의 긴 주소는 곧바로 지워집니다. 링크를 연 뒤 새로고침하면 다시 채울 필요가 없습니다.
     </div>
     <div class="stack" id="codes"></div>
     <p class="hint">적어 둔 코드가 있는 항목은 <b>복사</b> 버튼으로 바로 클립보드에 담깁니다.</p>
@@ -148,10 +172,22 @@
   </div>
 </div>
 
+<!-- 사진 크게 보기 (라이트박스) -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="사진 크게 보기" hidden>
+  <div class="lb-bar">
+    <div class="lb-cap" id="lbCap"></div>
+    <button class="lb-close" id="lbClose" type="button" aria-label="닫기">×</button>
+  </div>
+  <button class="lb-nav lb-prev" id="lbPrev" type="button" aria-label="이전 사진">‹</button>
+  <div class="lb-stage" id="lbStage"><img id="lbImg" alt="사진 크게 보기"></div>
+  <button class="lb-nav lb-next" id="lbNext" type="button" aria-label="다음 사진">›</button>
+  <div class="lb-foot"><span id="lbCount">1 / 1</span><span class="lb-tip">좌우로 밀거나 화살표로 넘기기</span></div>
+</div>
+
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="world.js"></script>
-<script src="data.js"></script>
-<script src="app.js"></script>
+<script src="data.js?v=4"></script>
+<script src="app.js?v=4"></script>
 </body>
 </html>

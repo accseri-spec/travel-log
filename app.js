@@ -284,6 +284,145 @@
       '<span><span class="ln"></span>예정 항로 SQ615·SQ8494·QF644·VA485</span>' +
       '<span><span class="ln dash"></span>미확정 귀국편 JQ53</span>' +
       '<span><i style="background:#1D5FA8;border-radius:999px"></i>도시 핀</span>';
+
+    initMapZoom(wrap);
+  }
+
+  /* ---------------- 지도 확대 · 축소 · 이동 ---------------- */
+  var mapZoom = null;
+  function initMapZoom(wrap) {
+    var svg = wrap.querySelector("svg");
+    if (!svg) return;
+    var VB = { x: 0, y: 0, w: W, h: H };
+    var MIN_W = W / 7;          /* 최대 약 7배까지 */
+    var pts = {}, dragging = false, last = null, pinch = null;
+
+    function apply() {
+      svg.setAttribute("viewBox", VB.x.toFixed(2) + " " + VB.y.toFixed(2) + " " + VB.w.toFixed(2) + " " + VB.h.toFixed(2));
+      var z = W / VB.w;
+      var lvl = $("#mapZoomLevel");
+      if (lvl) lvl.textContent = (z < 1.005 ? "1.0" : z.toFixed(1)) + "×";
+      var inB = $("#btnMapZoomIn"), outB = $("#btnMapZoomOut");
+      if (inB) inB.disabled = VB.w <= MIN_W * 1.01;
+      if (outB) outB.disabled = VB.w >= W * 0.999;
+      wrap.classList.toggle("is-zoomed", VB.w < W * 0.999);
+    }
+    function clampView() {
+      if (!isFinite(VB.w) || VB.w <= 0) VB.w = W;
+      VB.w = Math.max(MIN_W, Math.min(W, VB.w));
+      VB.h = VB.w * (H / W);
+      VB.x = Math.max(0, Math.min(W - VB.w, VB.x));
+      VB.y = Math.max(0, Math.min(H - VB.h, VB.y));
+    }
+    function zoomAt(cx, cy, factor) {
+      if (!isFinite(factor) || factor <= 0) return;
+      var nw = Math.max(MIN_W, Math.min(W, VB.w / factor));
+      var nh = nw * (H / W);
+      var fx = VB.w ? (cx - VB.x) / VB.w : 0.5;
+      var fy = VB.h ? (cy - VB.y) / VB.h : 0.5;
+      VB.x = cx - fx * nw;
+      VB.y = cy - fy * nh;
+      VB.w = nw; VB.h = nh;
+      clampView(); apply();
+    }
+    function reset() { VB.x = 0; VB.y = 0; VB.w = W; VB.h = H; apply(); }
+    function zoomCenter(factor) { zoomAt(VB.x + VB.w / 2, VB.y + VB.h / 2, factor); }
+    function rect() { return svg.getBoundingClientRect(); }
+    function toVb(clientX, clientY) {
+      var r = rect();
+      if (!r.width || !r.height) return { x: VB.x + VB.w / 2, y: VB.y + VB.h / 2 };
+      return {
+        x: VB.x + ((clientX - r.left) / r.width) * VB.w,
+        y: VB.y + ((clientY - r.top) / r.height) * VB.h
+      };
+    }
+    /* 마우스 휠 / 트랙패드 두 손가락 */
+    wrap.addEventListener("wheel", function (e) {
+      e.preventDefault();
+      var p = toVb(e.clientX, e.clientY);
+      var dy = e.deltaMode === 1 ? e.deltaY * 16 : (e.deltaMode === 2 ? e.deltaY * 100 : e.deltaY);
+      zoomAt(p.x, p.y, Math.exp(-dy * 0.0018));
+    }, { passive: false });
+
+    /* 더블클릭/더블탭: 그 지점으로 확대 */
+    wrap.addEventListener("dblclick", function (e) {
+      var p = toVb(e.clientX, e.clientY);
+      zoomAt(p.x, p.y, 1.9);
+    });
+
+    function keys() { return Object.keys(pts); }
+    function pinchState() {
+      var k = keys(), a = pts[k[0]], b = pts[k[1]];
+      if (!a || !b) return null;
+      return { d: Math.hypot(a.x - b.x, a.y - b.y) || 1, cx: (a.x + b.x) / 2, cy: (a.y + b.y) / 2 };
+    }
+
+    wrap.addEventListener("pointerdown", function (e) {
+      if (e.pointerType === "mouse" && e.button !== 0) return;
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var k = keys();
+      /* 터치는 한 손가락으로 페이지를 스크롤하고, 두 손가락으로만 지도를 옮깁니다 */
+      if (k.length === 1 && e.pointerType === "mouse") {
+        dragging = true; last = { x: e.clientX, y: e.clientY }; pinch = null;
+        wrap.classList.add("is-drag");
+        try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
+      } else if (k.length === 2) {
+        dragging = false; last = null; pinch = pinchState();
+        try { wrap.setPointerCapture(e.pointerId); } catch (err) {}
+      }
+    });
+
+    wrap.addEventListener("pointermove", function (e) {
+      if (!pts[e.pointerId]) return;
+      pts[e.pointerId] = { x: e.clientX, y: e.clientY };
+      var k = keys();
+      if (k.length >= 2 && pinch) {
+        var a = pts[k[0]], b = pts[k[1]];
+        if (!a || !b) return;
+        var d = Math.hypot(a.x - b.x, a.y - b.y) || 1;
+        var cx = (a.x + b.x) / 2, cy = (a.y + b.y) / 2;
+        var r2 = rect();
+        if (pinch.d > 4 && d > 4 && r2.width && r2.height) {
+          var mid = toVb(cx, cy);
+          zoomAt(mid.x, mid.y, d / pinch.d);
+          /* 두 손가락 중심이 움직인 만큼 지도도 따라 옮깁니다 */
+          VB.x -= (cx - pinch.cx) / r2.width * VB.w;
+          VB.y -= (cy - pinch.cy) / r2.height * VB.h;
+          clampView(); apply();
+        }
+        pinch.d = d; pinch.cx = cx; pinch.cy = cy;
+        return;
+      }
+      if (dragging && last && k.length === 1) {
+        var r = rect();
+        if (!r.width || !r.height) return;
+        var dx = (e.clientX - last.x) / r.width * VB.w;
+        var dy = (e.clientY - last.y) / r.height * VB.h;
+        last = { x: e.clientX, y: e.clientY };
+        if (!dx && !dy) return;
+        VB.x -= dx; VB.y -= dy;
+        clampView(); apply();
+      }
+    });
+
+    function pointerEnd(e) {
+      delete pts[e.pointerId];
+      var k = keys();
+      if (k.length < 2) pinch = null;
+      if (!k.length) {
+        dragging = false; last = null;
+        wrap.classList.remove("is-drag");
+      } else if (k.length === 1) {
+        last = { x: pts[k[0]].x, y: pts[k[0]].y };
+        dragging = true;
+      }
+    }
+    wrap.addEventListener("pointerup", pointerEnd);
+    wrap.addEventListener("pointercancel", pointerEnd);
+    wrap.addEventListener("pointerleave", function (e) { if (e.pointerType === "mouse" && dragging) pointerEnd(e); });
+
+    mapZoom = { zoom: zoomCenter, reset: reset, apply: apply, state: function () { return { x: VB.x, y: VB.y, w: VB.w, h: VB.h }; } };
+    apply();
   }
 
   /* ---------------- 데이터 뷰 ---------------- */
@@ -292,6 +431,7 @@
     var v = {};
     for (var k in c) v[k] = c[k];
     for (var k2 in st) v[k2] = st[k2];
+    v.weather = c.weather;   /* 날씨는 사용자가 적지 않고 data.js(코코 갱신) 값만 보여 줍니다 */
     return v;
   }
   function allComps() { return T.competitions.map(compView); }
@@ -318,6 +458,12 @@
     });
     return n;
   }
+  /* 사진 칸 전체 용량: 날짜별 5장 × 10일 + 대회마다 일반 5장 + 완주증·메달 5장 */
+  function photoCapacity() {
+    var cap = T.days.length * 5;
+    T.competitions.forEach(function () { cap += 10; });
+    return cap;
+  }
 
   /* ---------------- 통계 · D-day · 표 ---------------- */
   function renderStats() {
@@ -338,7 +484,7 @@
       stat("방문 도시", ausCities + "곳", "", "호주 4곳 · 싱가포르는 경유 · 10월 대회 도시는 미입력") +
       stat("누적 수영 거리", String(km), "km", done.length ? done.length + "개 대회 완주 기록 합계" : "완주 기록 0건 — ④번에 시간을 적으면 자동 합산") +
       stat("등록된 대회", comps.length + "건", "", "완주 기록 " + done.length + "건 · 예정 " + upcoming + "건") +
-      stat("사진", photos + " / 50", "칸", "날짜별 5칸 × 10일 · 대회 사진 포함") +
+      stat("사진", photos + " / " + photoCapacity(), "칸", "날짜별 5칸 × " + T.days.length + "일 · 대회 사진·완주증 각 5칸") +
       stat("일지 입력률", journalDays + " / " + T.days.length, "일", journalDays ? "나머지 날짜도 채워 보세요" : "아직 비어 있음 — ③번에서 적을 수 있어요");
   }
 
@@ -456,12 +602,27 @@
       if (!pid) return;
       var cell = document.createElement("div");
       cell.className = "ph" + (rep === pid ? " rep" : "");
+      cell.setAttribute("role", "button");
+      cell.setAttribute("tabindex", "0");
+      cell.setAttribute("aria-label", "사진을 크게 봅니다");
+      cell.title = "눌러서 크게 보기";
       cell.innerHTML = '<img alt="사진" src="data:image/gif;base64,R0lGODlhAQABAAAAACw=">' +
         '<button type="button" class="del" aria-label="사진 지우기">×</button>' +
         (repSet ? '<button type="button" class="repbtn">' + (rep === pid ? "대표" : "대표로") + "</button>" : "");
       var img = cell.querySelector("img");
       getPhoto(pid).then(function (src) { if (src) img.src = src; });
-      cell.querySelector(".del").addEventListener("click", function () {
+      cell.addEventListener("click", function (e) {
+        if (e.target.closest("button")) return;
+        openLightbox(list.slice(), pid, opts.caption || opts.label || "사진");
+      });
+      cell.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          openLightbox(list.slice(), pid, opts.caption || opts.label || "사진");
+        }
+      });
+      cell.querySelector(".del").addEventListener("click", function (e) {
+        e.stopPropagation();
         if (!window.confirm("이 사진을 지울까요?")) return;
         PhotoStore.del(pid);
         delete photoCache[pid];
@@ -471,7 +632,8 @@
         if (opts.after) opts.after();
       });
       if (repSet) {
-        cell.querySelector(".repbtn").addEventListener("click", function () {
+        cell.querySelector(".repbtn").addEventListener("click", function (e) {
+          e.stopPropagation();
           repSet(rep === pid ? null : pid);
           save(true);
           if (opts.after) opts.after();
@@ -516,6 +678,163 @@
     return box;
   }
 
+  /* ---------------- 사진 크게 보기 (라이트박스) ---------------- */
+  var lb = { ids: [], i: 0, cap: "" };
+  function openLightbox(ids, id, cap) {
+    var clean = (ids || []).filter(Boolean);
+    var idx = clean.indexOf(id);
+    if (idx < 0) return;
+    lb.ids = clean;
+    lb.i = idx;
+    lb.cap = cap || "사진";
+    showLightbox();
+  }
+  function showLightbox() {
+    var host = $("#lightbox"), img = $("#lbImg");
+    if (!host || !img) return;
+    var id = lb.ids[lb.i];
+    img.removeAttribute("src");
+    img.alt = lb.cap;
+    getPhoto(id).then(function (src) { if (lb.ids[lb.i] === id) img.src = src || ""; });
+    $("#lbCap").textContent = lb.cap;
+    $("#lbCount").textContent = (lb.i + 1) + " / " + lb.ids.length;
+    var multi = lb.ids.length > 1;
+    ["#lbPrev", "#lbNext"].forEach(function (sel) {
+      var b = $(sel);
+      if (!b) return;
+      b.hidden = !multi;
+      b.disabled = !multi;
+    });
+    host.hidden = false;
+    document.documentElement.classList.add("lb-open");
+    document.body.classList.add("lb-open");
+  }
+  function closeLightbox() {
+    var host = $("#lightbox");
+    if (!host || host.hidden) return;
+    host.hidden = true;
+    var img = $("#lbImg");
+    if (img) img.removeAttribute("src");
+    document.documentElement.classList.remove("lb-open");
+    document.body.classList.remove("lb-open");
+  }
+  function lightboxStep(n) {
+    if (lb.ids.length < 2) return;
+    lb.i = (lb.i + n + lb.ids.length) % lb.ids.length;
+    showLightbox();
+  }
+  function bindLightbox() {
+    $("#lbClose").addEventListener("click", closeLightbox);
+    $("#lbPrev").addEventListener("click", function () { lightboxStep(-1); });
+    $("#lbNext").addEventListener("click", function () { lightboxStep(1); });
+    $("#lightbox").addEventListener("click", function (e) {
+      if (e.target.id === "lightbox" || e.target.id === "lbStage") closeLightbox();
+    });
+    var stage = $("#lbStage"), sx = 0, sy = 0, swiping = false;
+    stage.addEventListener("touchstart", function (e) {
+      if (e.touches.length !== 1) { swiping = false; return; }
+      swiping = true; sx = e.touches[0].clientX; sy = e.touches[0].clientY;
+    }, { passive: true });
+    stage.addEventListener("touchend", function (e) {
+      if (!swiping) return;
+      swiping = false;
+      var t = e.changedTouches && e.changedTouches[0];
+      if (!t) return;
+      var dx = t.clientX - sx, dy = t.clientY - sy;
+      if (Math.abs(dx) > 45 && Math.abs(dx) > Math.abs(dy)) lightboxStep(dx < 0 ? 1 : -1);
+      else if (dy > 90 && Math.abs(dy) > Math.abs(dx)) closeLightbox();
+    }, { passive: true });
+  }
+
+  /* ---------------- 달력 (11/19~28) ---------------- */
+  var focusDate = null;
+  var calIdx = 0;
+
+  function calMonths() {
+    var out = [], seen = {};
+    T.days.forEach(function (d) {
+      var t = parseDate(d.date);
+      if (t == null) return;
+      var dt = new Date(t);
+      var key = dt.getUTCFullYear() + "-" + dt.getUTCMonth();
+      if (seen[key]) return;
+      seen[key] = 1;
+      out.push({ y: dt.getUTCFullYear(), m: dt.getUTCMonth() });
+    });
+    return out;
+  }
+  function renderCalendar() {
+    var host = $("#calGrid");
+    if (!host) return;
+    var months = calMonths();
+    if (!months.length) { host.innerHTML = ""; return; }
+    if (calIdx >= months.length) calIdx = 0;
+    var mo = months[calIdx];
+
+    $("#calTitle").textContent = mo.y + "년 " + (mo.m + 1) + "월";
+    var firstD = T.days[0].date, lastD = T.days[T.days.length - 1].date;
+    $("#calCard .cal-sub").textContent = "여행 " + firstD.slice(5).replace("-", "/") + " ~ " + lastD.slice(5).replace("-", "/");
+    $("#calPrev").disabled = calIdx <= 0;
+    $("#calNext").disabled = calIdx >= months.length - 1;
+
+    if (!$("#calDow").childNodes.length) {
+      $("#calDow").innerHTML = ["일", "월", "화", "수", "목", "금", "토"].map(function (w, i) {
+        return '<span class="' + (i === 0 ? "sun" : (i === 6 ? "sat" : "")) + '">' + w + "</span>";
+      }).join("");
+    }
+
+    var byDate = {};
+    T.days.forEach(function (d) { byDate[d.date] = d; });
+    var startDow = new Date(Date.UTC(mo.y, mo.m, 1)).getUTCDay();
+    var lastDay = new Date(Date.UTC(mo.y, mo.m + 1, 0)).getUTCDate();
+    var today = todayStr();
+    var html = "";
+    for (var i = 0; i < startDow; i++) html += '<span class="cal-pad" aria-hidden="true"></span>';
+    for (var day = 1; day <= lastDay; day++) {
+      var date = mo.y + "-" + String(mo.m + 1).padStart(2, "0") + "-" + String(day).padStart(2, "0");
+      var d = byDate[date];
+      if (!d) {
+        html += '<span class="cal-day out"><b>' + day + "</b></span>";
+        continue;
+      }
+      var cls = "cal-day trip" + (date === today ? " today" : "") + (focusDate === date ? " is-sel" : "");
+      if (d.badgeKind === "race") cls += " race";
+      var ic = "";
+      if (d.badgeKind === "race") ic += '<i class="cal-ico race">◆</i>';
+      if (/비|이슬비/.test(String(d.weather || ""))) ic += '<i class="cal-ico rain">☂</i>';
+      html += '<button type="button" class="' + cls + '" data-date="' + date + '" aria-label="' +
+        esc(date.slice(5).replace("-", "/") + " " + d.title) + ' — 그날 기록으로 이동">' +
+        "<b>" + day + "</b>" + ic + "</button>";
+    }
+    host.innerHTML = html;
+    $$("[data-date]", host).forEach(function (b) {
+      b.addEventListener("click", function () { focusDay(b.getAttribute("data-date")); });
+    });
+  }
+
+  function focusDay(date) {
+    focusDate = date;
+    renderCalendar();
+    var el = $('.day[data-date="' + date + '"]');
+    $$(".day").forEach(function (card) {
+      card.classList.toggle("is-focus", card.getAttribute("data-date") === date);
+    });
+    if (!el) return;
+    var bar = $(".topbar");
+    var off = (bar ? bar.getBoundingClientRect().height : 0) + 10;
+    var top = el.getBoundingClientRect().top + (window.pageYOffset || 0) - off;
+    try { window.scrollTo({ top: top, behavior: "smooth" }); }
+    catch (e) { window.scrollTo(0, top); }
+  }
+  function bindCalendar() {
+    $("#calPrev").addEventListener("click", function () {
+      if (calIdx > 0) { calIdx--; renderCalendar(); }
+    });
+    $("#calNext").addEventListener("click", function () {
+      if (calIdx < calMonths().length - 1) { calIdx++; renderCalendar(); }
+    });
+  }
+
   /* ---------------- 날짜별 기록 ---------------- */
   function renderDays() {
     var host = $("#days");
@@ -524,14 +843,16 @@
     T.days.forEach(function (d) {
       var st = ensureDay(d.date);
       var card = document.createElement("article");
-      card.className = "day" + (d.date === today ? " now" : "");
+      card.className = "day" + (d.date === today ? " now" : "") + (focusDate === d.date ? " is-focus" : "");
+      card.setAttribute("data-date", d.date);
       var badge = d.badge ? '<span class="badge ' + (d.badgeKind || "") + '">' + esc(d.badge) + "</span>" : "";
       var nowTag = d.date === today ? '<span class="badge done">오늘</span>' : "";
       card.innerHTML =
         '<div class="day-head"><div class="day-date"><div class="d">' + d.date.slice(5).replace("-", "/") + '</div><div class="w">' + esc(d.dow) + "</div></div>" +
         '<div style="min-width:0"><div class="day-title">' + esc(d.title) + badge + nowTag + '</div>' +
         '<div class="day-sub">' + esc(d.tz) + " · " + esc(d.city) + "</div></div></div>" +
-        '<div class="weather">☁ ' + esc(d.weather) + "</div>" +
+        '<div class="weather">☁ ' + esc(d.weather) +
+        (d.weatherAt ? ' <span class="wx-at">' + esc(d.weatherAt) + ' 예보</span>' : "") + "</div>" +
         '<div class="day-body"><ul class="timeline">' +
         d.items.map(function (it) { return '<li><span class="t">' + esc(it.t) + '</span><span class="x">' + esc(it.x) + "</span></li>"; }).join("") +
         "</ul>" +
@@ -545,6 +866,7 @@
 
       var ph = photoBlock({
         list: st.photos, max: 5, label: "사진",
+        caption: d.date.slice(5).replace("-", "/") + " " + d.title,
         repGet: function () { return st.rep; },
         repSet: function (pid) { st.rep = pid; },
         after: function () { refresh(); }
@@ -564,6 +886,17 @@
   function compField(c, key, label, type, ph) {
     return '<label class="lbl">' + esc(label) + '<input type="' + (type || "text") + '" data-comp="' + c.id + '" data-key="' + key + '" value="' + esc(c[key] == null ? "" : c[key]) + '" placeholder="' + esc(ph || "") + '"></label>';
   }
+  /* 날씨는 사용자가 적는 칸이 아니라 코코가 data.js에서 갱신한 값을 읽기 전용으로 보여 줍니다. */
+  function weatherLine(c) {
+    var w = c.weather, text = "", at = "";
+    if (w && typeof w === "object") { text = w.text || ""; at = w.at || ""; }
+    else if (typeof w === "string") { text = w; }
+    if (!text) {
+      return '<div class="wxline empty"><span class="wx-k">현지 날씨</span><span class="wx-v">아직 예보 없음 — 코코가 여행 기간에 맞춰 채웁니다</span></div>';
+    }
+    return '<div class="wxline"><span class="wx-k">현지 날씨</span><span class="wx-v">' + esc(text) + "</span>" +
+      (at ? '<span class="wx-at">' + esc(at) + " 예보</span>" : "") + "</div>";
+  }
   function renderComps() {
     var host = $("#comps");
     host.innerHTML = "";
@@ -579,21 +912,24 @@
         '<div style="min-width:0"><div class="day-title">' + esc(c.name) + statusBadge + "</div>" +
         '<div class="day-sub">' + esc(c.official || "대회명 미입력") + " · " + esc(c.place) + "</div></div></div>" +
         '<div class="day-body">' +
-        '<div class="grid2">' + compField(c, "date", "날짜", "date") + compField(c, "name", "대회명") + "</div>" +
+        weatherLine(c) +
+        '<div class="fieldrow">' + compField(c, "date", "날짜", "date") + compField(c, "name", "대회명") + "</div>" +
         compField(c, "place", "장소") +
         '<div class="grid2">' + compField(c, "event", "종목") + compField(c, "distance", "거리 (km)", "number") + "</div>" +
         '<div class="grid2">' + compField(c, "time", "내 기록 (예: 3:12:00)", "text", "완주 시간") + compField(c, "temp", "수온", "text", "예: 19℃") + "</div>" +
-        compField(c, "weather", "날씨") +
         compField(c, "condition", "그날 컨디션", "text", "예: 잠 6시간, 어깨 컨디션 좋음") +
         compField(c, "note", "비고") +
         '<div class="certwrap"></div><div class="phostack"></div></div>';
       host.appendChild(card);
 
       card.querySelector(".certwrap").appendChild(photoBlock({
-        list: st.certs, max: 1, label: "완주증 · 메달", after: function () { save(true); renderStats(); }
+        list: st.certs, max: 5, label: "완주증 · 메달 (최대 5장)",
+        caption: (c.name || "대회") + " 완주증·메달",
+        after: function () { save(true); renderStats(); }
       }));
       card.querySelector(".phostack").appendChild(photoBlock({
         list: st.photos, max: 5, label: "대회 사진",
+        caption: c.name || "대회 사진",
         repGet: function () { return st.rep; },
         repSet: function (pid) { st.rep = pid; },
         after: function () { refresh(); }
@@ -657,6 +993,59 @@
       '<text x="2" y="14" font-size="11" fill="#86929E">페이스 / 100m</text></svg>';
   }
 
+  /* ---------------- #codes= 한 번 채우기 (기기에만 저장) ---------------- */
+  function b64ToJson(s) {
+    if (!s) return null;
+    var b = String(s).replace(/-/g, "+").replace(/_/g, "/").replace(/\s+/g, "");
+    while (b.length % 4) b += "=";
+    var bin = atob(b);
+    if (window.TextDecoder) {
+      var bytes = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      return JSON.parse(new TextDecoder("utf-8").decode(bytes));
+    }
+    return JSON.parse(decodeURIComponent(escape(bin)));
+  }
+  /* 주소창의 #codes=<base64> 를 읽어 localStorage에만 넣고 해시는 지웁니다.
+     URL 조각(#)은 서버·GitHub 로그로 전송되지 않고, replaceState로 기록에서도 지웁니다. */
+  function readCodesFromHash() {
+    var h = location.hash || "";
+    var m = h.match(/^#?codes=([^&]*)/);
+    if (!m) return false;
+    var raw = m[1] || "";
+    var candidates = [raw];
+    try { candidates.push(decodeURIComponent(raw)); } catch (e) {}
+    var payload = null;
+    for (var i = 0; i < candidates.length && !payload; i++) {
+      try { payload = b64ToJson(candidates[i]); } catch (e) { payload = null; }
+    }
+    /* 긴 목록은 읽는 즉시 주소창에서 지웁니다 (뒤로가기 기록에도 남기지 않음) */
+    try { history.replaceState(null, "", location.pathname + location.search + "#codes"); }
+    catch (e2) { location.hash = "codes"; }
+
+    if (!payload || typeof payload !== "object") {
+      toast("예약 코드 링크를 읽지 못했어요 — 코코에게 다시 받아 주세요");
+      return true;
+    }
+    var map = payload.codes && typeof payload.codes === "object" ? payload.codes : payload;
+    var known = {};
+    T.bookings.forEach(function (b) { known[b.id] = 1; });
+    var n = 0;
+    Object.keys(map).forEach(function (k) {
+      var v = map[k];
+      if (!known[k] || typeof v !== "string" || !v.trim()) return;
+      S.codes[k] = v.trim();
+      n++;
+    });
+    if (n) {
+      save(true);
+      toast("예약 코드가 이 기기에만 안전하게 저장됐어요");
+    } else {
+      toast("새로 저장할 예약 코드가 없었어요");
+    }
+    return true;
+  }
+
   /* ---------------- 예약 코드 ---------------- */
   function renderCodes() {
     var host = $("#codes");
@@ -708,7 +1097,7 @@
       ["다녀온 곳", T.trip.places],
       ["수영대회", race ? race.name + " — 기록 " + (race.time || "(미입력)") + " · 사진 " + racePhotos + "/5" : "(미입력)"],
       ["액티비티", T.trip.activities],
-      ["일지", journalDays + "일 기록 · 사진 " + photoCount() + "/50"],
+      ["일지", journalDays + "일 기록 · 사진 " + photoCount() + "/" + photoCapacity()],
       ["누적 수영", km ? km + " km" : "0 km (완주 기록 입력 전)"],
       ["가장 기억에 남는 순간", S.summary.moment || "(여행 후 적어 주세요)"],
       ["한 줄 소감", S.summary.line || "(여행 후 적어 주세요)"]
@@ -821,6 +1210,8 @@
   }
 
   function init() {
+    readCodesFromHash();      /* #codes=… → 이 기기에만 저장하고 해시 삭제 */
+    focusDate = (T.days.filter(function (d) { return d.date === todayStr(); })[0] || {}).date || null;
     applyBig();
     renderMap();
     renderCountryTable();
@@ -829,12 +1220,21 @@
     renderChecklist();
     renderEmergency();
     refresh();
+    renderCalendar();
+    bindCalendar();
+    bindLightbox();
 
     $$(".tab").forEach(function (t) {
       t.addEventListener("click", function () { showTab(t.getAttribute("data-tab")); });
     });
     var initial = (location.hash || "").replace("#", "");
     if (["cover", "prep", "days", "comp", "codes"].indexOf(initial) >= 0) showTab(initial);
+
+    if (mapZoom) {
+      $("#btnMapZoomIn").addEventListener("click", function () { mapZoom.zoom(1.7); });
+      $("#btnMapZoomOut").addEventListener("click", function () { mapZoom.zoom(1 / 1.7); });
+      $("#btnMapReset").addEventListener("click", function () { mapZoom.reset(); });
+    }
 
     $("#btnBig").addEventListener("click", function () {
       S.settings.big = !S.settings.big; save(true); applyBig();
@@ -856,8 +1256,17 @@
       if (!window.confirm("체크한 준비물을 모두 지울까요?")) return;
       S.checklist = {}; save(true); renderChecklist(); renderStats();
     });
-    document.addEventListener("keydown", function (e) { if (e.key === "Escape") $("#summaryModal").hidden = true; });
-    window.TL = { state: function () { return S; }, refresh: refresh };
+    document.addEventListener("keydown", function (e) {
+      var lbox = $("#lightbox");
+      if (lbox && !lbox.hidden) {
+        if (e.key === "Escape") closeLightbox();
+        else if (e.key === "ArrowLeft") lightboxStep(-1);
+        else if (e.key === "ArrowRight") lightboxStep(1);
+        return;
+      }
+      if (e.key === "Escape") $("#summaryModal").hidden = true;
+    });
+    window.TL = { state: function () { return S; }, refresh: refresh, focusDay: focusDay, map: function () { return mapZoom; } };
   }
 
   if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);

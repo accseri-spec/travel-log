@@ -1,5 +1,14 @@
 /* 초기 데이터 — travel-log/index.md, trips/2026-11-australia.md, competitions/README.md, checklist.md 에서 옮김
    공개 페이지이므로 여권번호·개인 전화번호·상세 주소·예약 코드는 넣지 않았습니다. */
+
+/* ── 현지 날씨: 코코가 갱신하는 자리 ───────────────────────────────
+   여행 기간(2026-11-19~28)의 최신 예보를 코코가 이 파일에서 직접 고칩니다.
+   사이트에는 날씨를 직접 입력하는 칸이 없고, 여기 적힌 값만 표시됩니다.
+     · days[i].weather   : "비·이슬비, 25~31℃, 강수 86%, UV 6" 처럼 한 줄 요약
+     · days[i].weatherAt : 그 예보를 조회한 날 "2026-11-16" (없으면 표시 생략)
+     · competitions[i].weather : { text: "이슬비 16~19℃, 강수 58%", at: "2026-11-16" }
+   예보 범위 밖이면 "아직 예보 범위 밖 — 출발 전 확인" 처럼 그대로 적습니다.
+   data.js 는 공개 파일이므로 날씨 외의 개인정보는 넣지 않습니다. */
 window.TRIP = {
   name: "김상진",
   title: "김상진님의 평생 여행 로그",
@@ -45,7 +54,7 @@ window.TRIP = {
     {
       date: "2026-11-19", dow: "목", tz: "SGT (UTC+8)", city: "싱가포르",
       title: "부산 → 싱가포르, 창이 T1 환승호텔",
-      weather: "비·이슬비, 25~31℃, 강수 86%, UV 6",
+      weather: "비·이슬비, 25~31℃, 강수 86%, UV 6", weatherAt: "2026-11-15",
       badge: "", badgeKind: "",
       items: [
         { t: "07:45", x: "SQ615 김해 → 창이 T2 13:35 (좌석 64C, 위탁 25kg)" },
@@ -57,7 +66,7 @@ window.TRIP = {
     {
       date: "2026-11-20", dow: "금", tz: "AWST (UTC+8)", city: "퍼스·쿠지",
       title: "싱가포르 → 퍼스(쿠지), 렌트카 픽업",
-      weather: "이슬비, 17~20℃, 강수 53%, 낮 바람 22km/h",
+      weather: "이슬비, 17~20℃, 강수 53%, 낮 바람 22km/h", weatherAt: "2026-11-15",
       badge: "", badgeKind: "",
       items: [
         { t: "03:15", x: "SQ8494(스쿠트 TR52) 창이 T1 → 퍼스 T1 08:25 · 좌석은 체크인 때 무료 랜덤 배정" },
@@ -68,7 +77,7 @@ window.TRIP = {
     {
       date: "2026-11-21", dow: "토", tz: "AWST", city: "쿠지",
       title: "쿠지 비치 10km 오픈워터 대회",
-      weather: "이슬비, 16~19℃, 강수 58%, 낮 바람 37km/h",
+      weather: "이슬비, 16~19℃, 강수 58%, 낮 바람 37km/h", weatherAt: "2026-11-15",
       badge: "대회", badgeKind: "race",
       items: [
         { t: "06:30", x: "Coogee Beach SLSC 해변 텐트에서 이름과 10km를 말하고 수모(일반부 빨강)·넘버타투·타이밍칩 수령 (~07:30)" },
@@ -79,7 +88,7 @@ window.TRIP = {
     {
       date: "2026-11-22", dow: "일", tz: "AWST", city: "로킹엄",
       title: "로킹엄 — 야생 돌고래 수영 + 15:00 제트스키",
-      weather: "이슬비·대체로 흐림, 13~18℃, 강수 49%",
+      weather: "이슬비·대체로 흐림, 13~18℃, 강수 49%", weatherAt: "2026-11-15",
       badge: "미확정", badgeKind: "warn",
       items: [
         { t: "오전", x: "돌고래 수영 (Perth Wildlife Encounters) — 회신 대기 중" },
@@ -89,7 +98,7 @@ window.TRIP = {
     {
       date: "2026-11-23", dow: "월", tz: "AWST", city: "줄리언 베이",
       title: "줄리언 베이 바다사자 수영 07:00~09:30",
-      weather: "바람 많음, 14~20℃, 강수 0%, UV 10",
+      weather: "바람 많음, 14~20℃, 강수 0%, UV 10", weatherAt: "2026-11-15",
       badge: "", badgeKind: "",
       items: [
         { t: "04:15", x: "쿠지 출발 (편도 2.5시간)" },
@@ -101,7 +110,7 @@ window.TRIP = {
     {
       date: "2026-11-24", dow: "화", tz: "AWST → AEDT (UTC+11)", city: "시드니",
       title: "퍼스 → 시드니, 하버브리지 트와일라잇 등반",
-      weather: "시드니: 이슬비, 16~25℃, 강수 52%, UV 10",
+      weather: "시드니: 이슬비, 16~25℃, 강수 52%, UV 10", weatherAt: "2026-11-15",
       badge: "", badgeKind: "",
       items: [
         { t: "06:00", x: "쿠지 체크아웃 → 06:30 렌트카 무인 반납 (국제운전면허증·실물 신용카드 필요)" },
@@ -113,7 +122,7 @@ window.TRIP = {
     {
       date: "2026-11-25", dow: "수", tz: "AEDT", city: "시드니",
       title: "본다이 런클럽 + 본다이 아이스버그 수영",
-      weather: "구름 조금, 15~20℃, 강수 37%, UV 9",
+      weather: "구름 조금, 15~20℃, 강수 37%, UV 9", weatherAt: "2026-11-15",
       badge: "", badgeKind: "",
       items: [
         { t: "06:15", x: "Bondi Beach Run Club (Bondi Surf Bathers' SLSC 앞, 무료·사전신청 없음, 브론테 5km 왕복)" },
@@ -124,7 +133,7 @@ window.TRIP = {
     {
       date: "2026-11-26", dow: "목", tz: "AEDT → AEST (UTC+10)", city: "선샤인코스트",
       title: "시드니 → 선샤인코스트, 코튼 트리",
-      weather: "아직 예보 범위 밖 — 출발 전 확인",
+      weather: "아직 예보 범위 밖 — 출발 전 확인", weatherAt: "",
       badge: "", badgeKind: "",
       items: [
         { t: "08:10", x: "VA485 시드니 T2 → MCY 08:45 (좌석 24F)" },
@@ -135,7 +144,7 @@ window.TRIP = {
     {
       date: "2026-11-27", dow: "금", tz: "AEST", city: "브리즈번",
       title: "칼룬드라 스카이다이빙 14,000ft → 브리즈번",
-      weather: "아직 예보 범위 밖 — 출발 전 확인",
+      weather: "아직 예보 범위 밖 — 출발 전 확인", weatherAt: "",
       badge: "숙소 미확정", badgeKind: "warn",
       items: [
         { t: "08:15", x: "코튼트리 체크아웃" },
@@ -147,7 +156,7 @@ window.TRIP = {
     {
       date: "2026-11-28", dow: "토", tz: "AEST", city: "귀국",
       title: "브리즈번 → 귀국 (항공편 미확정)",
-      weather: "아직 예보 범위 밖 — 출발 전 확인",
+      weather: "아직 예보 범위 밖 — 출발 전 확인", weatherAt: "",
       badge: "미확정", badgeKind: "warn",
       items: [
         { t: "11:05", x: "JQ53 브리즈번 → 인천 19:55 — 유력하지만 아직 결제 전" },
@@ -163,7 +172,7 @@ window.TRIP = {
       official: "OWS Series Round 2 Coogee 10km",
       place: "호주 퍼스 Coogee Beach",
       event: "오픈워터", distance: 10, distanceUnit: "km",
-      temp: "", weather: "예보 이슬비 16~19℃, 강수 58%, 낮 바람 37km/h (2026-11-16 조회)",
+      temp: "", weather: { text: "이슬비 16~19℃, 강수 58%, 낮 바람 37km/h", at: "2026-11-15" },
       condition: "", note: "수모(일반부 빨강)·넘버타투·타이밍칩은 당일 해변 텐트에서 수령"
     },
     {
@@ -178,7 +187,7 @@ window.TRIP = {
       date: "2027-06-29", dateEnd: "2027-06-30", name: "세계마스터즈 오픈워터 3K",
       official: "세계마스터즈 — 남자 60–64세부",
       place: "헝가리 부다페스트 (발라톤 호수 가능)", event: "오픈워터", distance: 3, distanceUnit: "km",
-      temp: "", weather: "6월 말 22~25℃ 민물로 예상 (공식 발표 전)",
+      temp: "", weather: { text: "6월 말 22~25℃ 민물로 예상 (공식 발표 전)", at: "" },
       condition: "", note: "등록 마감일은 아직 공지 전"
     }
   ],
