@@ -174,7 +174,7 @@
     X: [1.0000, 0.9986, 0.9954, 0.9900, 0.9822, 0.9730, 0.9600, 0.9427, 0.9216, 0.8962, 0.8679, 0.8350, 0.7986, 0.7597, 0.7186, 0.6732, 0.6213, 0.5722, 0.5322],
     Y: [0.0000, 0.0620, 0.1240, 0.1860, 0.2480, 0.3100, 0.3720, 0.4340, 0.4958, 0.5571, 0.6176, 0.6769, 0.7346, 0.7903, 0.8435, 0.8936, 0.9394, 0.9761, 1.0000]
   };
-  var W = 1000, H = 508, CX = 120;
+  var W = 1000, H = 440, CX = 120, SCALE = W / 5.332;
 
   function shiftLon(lon) { return ((lon - CX + 180) % 360 + 360) % 360 - 180; }
   function projPx(lon, lat) {
@@ -188,15 +188,15 @@
   }
   function toSvg(lon, lat) {
     var p = projPx(lon, lat);
-    return [(p[0] + 2.666) / 5.332 * W, (1.3523 - p[1]) / 2.7046 * H];
+    return [(p[0] + 2.666) * SCALE, (1.3523 - p[1]) * SCALE];
   }
   function ringPath(ring) {
     var d = "", prev = null, move = true;
     for (var i = 0; i < ring.length; i++) {
       var sl = shiftLon(ring[i][0]);
       var p = projPx(ring[i][0], ring[i][1]);
-      var x = ((p[0] + 2.666) / 5.332 * W).toFixed(1);
-      var y = ((1.3523 - p[1]) / 2.7046 * H).toFixed(1);
+      var x = ((p[0] + 2.666) * SCALE).toFixed(1);
+      var y = ((1.3523 - p[1]) * SCALE).toFixed(1);
       if (prev !== null && Math.abs(sl - prev) > 180) move = true;
       d += (move ? "M" : "L") + x + " " + y;
       prev = sl; move = false;
@@ -255,9 +255,10 @@
       var ap = arcPath(a, b, r.curve);
       out.push('<path d="' + ap.d + '" fill="none" stroke="' + (r.dashed ? "#8A97A3" : "#1D5FA8") + '" stroke-width="3.4" stroke-linecap="round" ' + (r.dashed ? 'stroke-dasharray="8 7"' : "") + "/>");
       if (r.label) {
+        var lx = ap.mid[0] + (r.lx || 0), ly = ap.mid[1] + (r.ly || -12);
         var w = r.label.length * 7.4 + 14;
-        out.push('<g><rect x="' + (ap.mid[0] - w / 2).toFixed(1) + '" y="' + (ap.mid[1] - 22).toFixed(1) + '" width="' + w.toFixed(1) + '" height="18" rx="9" fill="#ffffff" opacity=".93"/>' +
-          '<text x="' + ap.mid[0].toFixed(1) + '" y="' + (ap.mid[1] - 8.5).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="700" fill="' + (r.dashed ? "#6B7683" : "#1D5FA8") + '">' + esc(r.label) + "</text></g>");
+        out.push('<g><rect x="' + (lx - w / 2).toFixed(1) + '" y="' + (ly - 14).toFixed(1) + '" width="' + w.toFixed(1) + '" height="18" rx="9" fill="#ffffff" opacity=".93"/>' +
+          '<text x="' + lx.toFixed(1) + '" y="' + (ly - 0.5).toFixed(1) + '" text-anchor="middle" font-size="13" font-weight="700" fill="' + (r.dashed ? "#6B7683" : "#1D5FA8") + '">' + esc(r.label) + "</text></g>");
       }
     });
 
@@ -274,8 +275,6 @@
       out.push('<text x="' + (p[0] + c.dx).toFixed(1) + '" y="' + (p[1] + c.dy).toFixed(1) + '" text-anchor="' + c.anchor + '" font-size="16" font-weight="700" fill="#1F2933" stroke="#ffffff" stroke-width="4.5" paint-order="stroke" stroke-linejoin="round">' + esc(c.name) + "</text>");
     });
 
-    var au = toSvg(134, -25);
-    out.push('<text x="' + au[0].toFixed(1) + '" y="' + au[1].toFixed(1) + '" text-anchor="middle" font-size="26" font-weight="800" fill="#CFE7DF">호주</text>');
     out.push("</svg>");
     wrap.innerHTML = out.join("");
 
@@ -328,7 +327,7 @@
     var journalDays = T.days.filter(function (d) { var v = S.days[d.date]; return v && v.journal && v.journal.trim(); }).length;
     var photos = photoCount();
     var visitedCountries = T.countries.filter(function (c) { return c.cls === "home" || c.cls === "visited"; }).length;
-    var ausCities = T.cities.filter(function (c) { return c.kind === "city"; }).length;
+    var ausCities = T.cities.filter(function (c) { return c.visit; }).length;
     var upcoming = comps.filter(function (c) { var n = daysUntil(c.date); return n != null && n >= 0; }).length;
 
     function stat(k, v, unit, note) {

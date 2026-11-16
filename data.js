@@ -13,23 +13,23 @@ window.TRIP = {
   ],
 
   cities: [
-    { key: "busan",     name: "부산 (집)",              lon: 129.08, lat: 35.18,  kind: "home",    dx: 14,  dy: 16,  anchor: "start" },
-    { key: "incheon",   name: "인천",                   lon: 126.44, lat: 37.46,  kind: "city",    dx: -12, dy: 20,  anchor: "end" },
-    { key: "singapore", name: "싱가포르 창이 (경유)",   lon: 103.99, lat: 1.36,   kind: "transit", dx: 16,  dy: -14, anchor: "start" },
-    { key: "perth",     name: "퍼스 · 쿠지 11/20~24",   lon: 115.77, lat: -32.12, kind: "city",    dx: 6,   dy: 34,  anchor: "start" },
-    { key: "sydney",    name: "시드니 11/24~26",        lon: 151.21, lat: -33.87, kind: "city",    dx: 34,  dy: 30,  anchor: "start" },
-    { key: "sunshine",  name: "선샤인코스트 11/26~27",  lon: 153.10, lat: -26.65, kind: "city",    dx: 26,  dy: -26, anchor: "start" },
-    { key: "brisbane",  name: "브리즈번 11/27~28",      lon: 153.03, lat: -27.47, kind: "city",    dx: 62,  dy: 6,   anchor: "start" },
+    { key: "busan",     name: "부산 (집)",              lon: 129.08, lat: 35.18,  kind: "home",    dx: 15,  dy: 18,  anchor: "start" },
+    { key: "incheon",   name: "인천",                   lon: 126.44, lat: 37.46,  kind: "city",    dx: -12, dy: 24,  anchor: "end", visit: false },
+    { key: "singapore", name: "싱가포르 창이 (경유)",   lon: 103.99, lat: 1.36,   kind: "transit", dx: 15,  dy: -13, anchor: "start" },
+    { key: "perth",     name: "퍼스 · 쿠지 11/20~24",   lon: 115.77, lat: -32.12, kind: "city",    dx: -12, dy: 46,  anchor: "end", visit: true },
+    { key: "sydney",    name: "시드니 11/24~26",        lon: 151.21, lat: -33.87, kind: "city",    dx: 14,  dy: 44,  anchor: "start", visit: true },
+    { key: "sunshine",  name: "선샤인코스트 11/26~27",  lon: 153.10, lat: -26.65, kind: "city",    dx: 16,  dy: -12, anchor: "start", visit: true },
+    { key: "brisbane",  name: "브리즈번 11/27~28",      lon: 153.03, lat: -27.47, kind: "city",    dx: 16,  dy: 20,  anchor: "start", visit: true },
     { key: "budapest",  name: "부다페스트 2027-06",     lon: 19.04,  lat: 47.50,  kind: "future",  dx: -14, dy: -22, anchor: "end" }
   ],
 
   route: [
-    { from: "busan",      to: "singapore", label: "SQ615",        curve: 0.14 },
-    { from: "singapore",  to: "perth",     label: "SQ8494",       curve: 0.18 },
-    { from: "perth",      to: "sydney",    label: "QF644",        curve: -0.17 },
-    { from: "sydney",     to: "sunshine",  label: "VA485",        curve: 0.30 },
+    { from: "busan",      to: "singapore", label: "SQ615",        curve: 0.14, lx: 30,  ly: -8 },
+    { from: "singapore",  to: "perth",     label: "",             curve: 0.18 },
+    { from: "perth",      to: "sydney",    label: "",             curve: -0.17 },
+    { from: "sydney",     to: "sunshine",  label: "",             curve: 0.30 },
     { from: "sunshine",   to: "brisbane",  label: "",             curve: 0.06 },
-    { from: "brisbane",   to: "incheon",   label: "JQ53 미확정",  curve: -0.16, dashed: true }
+    { from: "brisbane",   to: "incheon",   label: "JQ53 미확정",  curve: -0.16, dashed: true, lx: 46, ly: -6 }
   ],
 
   trip: {
