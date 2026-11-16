@@ -216,6 +216,21 @@ textarea:focus,input:focus,select:focus{outline:2px solid rgba(47,125,107,.35);o
 
 ul.plain{margin:.3rem 0 .6rem;padding-left:1.1rem;font-size:.85rem;color:var(--ink)}
 ul.plain li{margin:.18rem 0}
+
+/* 좎은 폰 (390px 안팍) */
+@media(max-width:26rem){
+  .topbar{padding:.45rem .55rem .3rem}
+  .brand{font-size:.95rem}
+  .tool{padding:.38rem .55rem;font-size:.78rem}
+  .tab{padding:.4rem .62rem;font-size:.82rem}
+  .hero h1{font-size:1.28rem}
+  main{padding:.7rem .55rem 1.6rem}
+  .stat .v{font-size:1.2rem}
+  .modal{padding:.7rem .45rem}
+  .modal-card{padding:.95rem .8rem .85rem;border-radius:16px}
+  .sum-row .k{flex:0 0 4.6rem}
+  .timeline .t{flex:0 0 2.7rem}
+}
 @media print{
   .topbar,.tools,.tabs,.modal-actions,.foot{display:none!important}
   .panel{display:block!important}

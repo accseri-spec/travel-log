@@ -705,7 +705,6 @@
     var journalDays = T.days.filter(function (d) { var v = S.days[d.date]; return v && v.journal && v.journal.trim(); }).length;
     var km = totalKm();
     return [
-      ["기간", T.trip.period + " (9박 10일)"],
       ["다녀온 곳", T.trip.places],
       ["수영대회", race ? race.name + " — 기록 " + (race.time || "(미입력)") + " · 사진 " + racePhotos + "/5" : "(미입력)"],
       ["액티비티", T.trip.activities],
