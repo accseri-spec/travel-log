@@ -222,7 +222,7 @@
     var cls = {};
     T.countries.forEach(function (c) { cls[c.code] = c.cls; });
     var out = [];
-    out.push('<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="세계 지도 — 대한민국·호주·헝가리를 색칠하고 도시 핀과 예정 항로를 표시">');
+    out.push('<svg viewBox="0 0 ' + W + " " + H + '" role="img" aria-label="세계 지도 — 다녀온 나라를 색칠하고 도시 핀과 예정 항로를 표시">');
     out.push('<rect width="' + W + '" height="' + H + '" fill="#DCEBF4"/>');
 
     var grid = "";
@@ -279,7 +279,7 @@
     wrap.innerHTML = out.join("");
 
     $("#mapLegend").innerHTML =
-      '<span><i style="background:#2F7D6B"></i>다녀온 곳 — 호주(2026-10 대회)·대한민국</span>' +
+      '<span><i style="background:#2F7D6B"></i>다녀온 나라 — 대한민국·호주·싱가포르(2025-08)·미국(2026-03)·대만(2026-06)</span>' +
       '<span><i style="background:#E9A23B"></i>예정 — 싱가포르 경유(11/19)·헝가리(2027-06)</span>' +
       '<span><span class="ln"></span>예정 항로 SQ615·SQ8494·QF644·VA485·JQ53</span>' +
       '<span><i style="background:#1D5FA8;border-radius:999px"></i>도시 핀</span>';
@@ -555,9 +555,11 @@
     function stat(k, v, unit, note) {
       return '<div class="stat"><div class="k">' + k + '</div><div class="v">' + v + (unit ? "<small>" + unit + "</small>" : "") + "</div>" + (note ? '<div class="n">' + note + "</div>" : "") + "</div>";
     }
+    var visitedNames = T.countries.filter(function (c) { return c.cls === "home" || c.cls === "visited"; })
+      .map(function (c) { return c.name; }).join(" · ");
     $("#stats").innerHTML =
-      stat("방문 국가", visitedCountries + "개국", "", "대한민국 · 호주 (＋예정: 헝가리)") +
-      stat("방문 도시", ausCities + "곳", "", "호주 4곳 · 싱가포르는 경유 · 10월 대회 도시는 미입력") +
+      stat("방문 국가", visitedCountries + "개국", "", visitedNames + " (＋예정: 헝가리)") +
+      stat("방문 도시", ausCities + "곳", "", "지도에 핀으로 표시된 도시 (지난 여행 도시 포함)") +
       stat("누적 수영 거리", String(km), "km", done.length ? done.length + "개 대회 완주 기록 합계" : "완주 기록 0건 — ④번에 시간을 적으면 자동 합산") +
       stat("등록된 대회", comps.length + "건", "", "완주 기록 " + done.length + "건 · 예정 " + upcoming + "건") +
       stat("사진", photos + " / " + photoCapacity(), "칸", "날짜별 5칸 × " + T.days.length + "일 · 대회 사진·완주증 각 5칸") +
@@ -571,6 +573,7 @@
     comps.forEach(function (c) {
       var n = daysUntil(c.date);
       if (n == null) return;
+      if (n < -30) return;   /* 한 달 넘은 지난 대회는 ④번 기록에만 남기고 여기서는 접습니다 */
       var past = n < 0;
       var badge = c.badgeKind === "race" ? '<span class="badge race">대회</span>' : (past ? '<span class="badge warn">지난 대회</span>' : '<span class="badge done">예정</span>');
       var over = past ? "지난 대회" : (shown === 0 ? "가장 가까운 대회" : "다음 목표 대회");
@@ -598,6 +601,32 @@
       '<div class="meta">' + esc(t.period) + "</div><div class=\"meta\">" + esc(t.route) + "</div></div>" +
       '<div class="item"><div class="overline">아카이브 · 기록 미입력</div><div class="title">2026년 10월 호주 수영대회</div>' +
       '<div class="meta">날짜 · 도시 미입력 — 완주 기록과 완주증·메달 사진을 받으면 ④번에 채웁니다</div></div>';
+  }
+
+  /* ---------------- 지난 여행 기록 (가민 · 메일 · 캘린더로 채운 아카이브) ---------------- */
+  function renderPastTrips() {
+    var host = $("#pastTrips");
+    if (!host) return;
+    var list = (T.pastTrips || []);
+    if (!list.length) { host.innerHTML = ""; return; }
+    host.innerHTML = list.map(function (p) {
+      var days = (p.days || []).map(function (d) {
+        return '<h3 class="sub">' + esc(d.date.slice(5).replace("-", "/") + " (" + d.dow + ") · " + d.city) + "</h3>" +
+          '<div class="day-sub">' + esc(d.title) + "</div>" +
+          '<ul class="timeline">' + d.items.map(function (it) {
+            return '<li><span class="t">' + esc(it.t) + '</span><span class="x">' + esc(it.x) + "</span></li>";
+          }).join("") + "</ul>";
+      }).join("");
+      return '<details class="item pasttrip">' +
+        '<summary><span class="overline">' + esc(p.overline) + "</span>" +
+        '<span class="title">' + esc(p.title) + "</span>" +
+        '<span class="meta">' + esc(p.period) + " · " + esc(p.route) + "</span>" +
+        '<span class="meta">' + esc(p.totals) + "</span></summary>" +
+        '<div class="day-body">' +
+        (p.race ? '<div class="meta">🏊 ' + esc(p.race) + "</div>" : "") +
+        (p.note ? '<div class="meta">' + esc(p.note) + "</div>" : "") +
+        days + "</div></details>";
+    }).join("");
   }
 
   /* ---------------- 미확정 · 체크리스트 · 비상 ---------------- */
@@ -982,7 +1011,9 @@
       var card = document.createElement("article");
       card.className = "day";
       var statusBadge = c.time ? '<span class="badge done">완주 기록</span>'
-        : (c.status === "기록 미입력" ? '<span class="badge warn">기록 미입력</span>' : (n != null && n >= 0 ? '<span class="badge race">예정</span>' : '<span class="badge">목표</span>'));
+        : (c.status === "기록 미입력" ? '<span class="badge warn">기록 미입력</span>'
+          : (n != null && n >= 0 ? '<span class="badge race">예정</span>'
+            : (n != null && n < 0 ? '<span class="badge warn">지난 대회</span>' : '<span class="badge">목표</span>')));
       card.innerHTML =
         '<div class="day-head"><div class="day-date"><div class="d">' + (c.date ? c.date.slice(5).replace("-", "/") : "—") + '</div><div class="w">' + esc(n == null ? "날짜 미입력" : ddayText(n)) + "</div></div>" +
         '<div style="min-width:0"><div class="day-title">' + esc(c.name) + statusBadge + "</div>" +
@@ -1277,6 +1308,7 @@
   function refresh() {
     renderStats();
     renderDDay();
+    renderPastTrips();
     renderDays();
     renderComps();
     renderDistTable();
