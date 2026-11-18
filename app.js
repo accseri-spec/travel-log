@@ -281,8 +281,7 @@
     $("#mapLegend").innerHTML =
       '<span><i style="background:#2F7D6B"></i>다녀온 곳 — 호주(2026-10 대회)·대한민국</span>' +
       '<span><i style="background:#E9A23B"></i>예정 — 싱가포르 경유(11/19)·헝가리(2027-06)</span>' +
-      '<span><span class="ln"></span>예정 항로 SQ615·SQ8494·QF644·VA485</span>' +
-      '<span><span class="ln dash"></span>미확정 귀국편 JQ53</span>' +
+      '<span><span class="ln"></span>예정 항로 SQ615·SQ8494·QF644·VA485·JQ53</span>' +
       '<span><i style="background:#1D5FA8;border-radius:999px"></i>도시 핀</span>';
 
     initMapZoom(wrap);
