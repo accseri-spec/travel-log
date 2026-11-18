@@ -54,7 +54,7 @@ window.TRIP = {
     {
       date: "2026-11-19", dow: "목", tz: "SGT (UTC+8)", city: "싱가포르",
       title: "부산 → 싱가포르, 창이 T1 환승호텔",
-      weather: "비, 25~30℃, 강수 95%, UV 6", weatherAt: "2026-11-18",
+      weather: "비, 25~30℃, 강수 97%, UV 7 (오전·저녁 이슬비)", weatherAt: "2026-11-18",
       badge: "", badgeKind: "",
       items: [
         { t: "07:45", x: "SQ615 김해 → 창이 T2 13:35 (좌석 64C, 위탁 25kg) · 온라인 체크인 완료, 실물 탑승권은 김해 카운터에서" },
@@ -66,7 +66,7 @@ window.TRIP = {
     {
       date: "2026-11-20", dow: "금", tz: "AWST (UTC+8)", city: "퍼스·쿠지",
       title: "싱가포르 → 퍼스(쿠지), 렌트카 픽업",
-      weather: "도착 시간대 흐림, 오후 한때 비, 16~24℃, 강수 55%", weatherAt: "2026-11-18",
+      weather: "도착 시간대(08~10시) 구름 조금, 오후 한때 비, 16~24℃, 강수 58%, 오후 바람 20~24km/h", weatherAt: "2026-11-18",
       badge: "", badgeKind: "",
       items: [
         { t: "03:15", x: "SQ8494(스쿠트 TR52) 창이 T1 → 퍼스 T1 08:25 · 좌석 25A, 온라인 체크인 완료" },
@@ -78,18 +78,20 @@ window.TRIP = {
     {
       date: "2026-11-21", dow: "토", tz: "AWST", city: "쿠지",
       title: "쿠지 비치 10km 오픈워터 대회",
-      weather: "이슬비 가능·바람 많음, 15~19℃, 강수 45%, 오전 바람 24~27km/h", weatherAt: "2026-11-18",
+      weather: "이슬비 가능·오전 강풍, 15~19℃, 대회 시간대(06~12시) 강수 0~8%, 바람 22→31km/h", weatherAt: "2026-11-18",
       badge: "대회", badgeKind: "race",
       items: [
-        { t: "06:00", x: "Coogee Beach 등록 텐트(6 Powell Rd)에서 06:00~07:00 사이 이름과 10km를 말하고 수모(일반부 빨강)·배번·넘버타투·타이밍칩 수령" },
-        { t: "—",     x: "OWS Series Round 2 Coogee 10km · 주최측 최종 시간표와 일정 변동 공지 확인 필요" },
-        { t: "—",     x: "행사장 상공 드론 금지 · 오전 바람 24~27km/h 예보라 해상 상태 확인 필요" }
+        { t: "06:00", x: "Coogee Beach 등록 텐트(6 Powell Rd, 06:00 오픈) — 10km는 07:00 마감(2.5km만 07:15). 이름과 10km를 말하고 수모(10km 일반부 빨강)·배번·넘버타투·타이밍칩 수령. 늦으면 출전 불가" },
+        { t: "—",     x: "타이밍칩은 손목(발목 금지) · 넘버타투는 왼쪽 어깨와 오른쪽 팔뚝에 자외선 차단제보다 먼저" },
+        { t: "07:00", x: "10km 브리핑(Entry Chute) → 07:25 10km 웨이브 출발 · 코스 #1(1.25km 8바퀴), 수온 18℃ 미만이면 웻수트 필요(당일 아침 수온 발표)" },
+        { t: "—",     x: "행사장 상공 드론 금지 · 대회 시간대 바람 22→31km/h 강풍 예보라 해상 상태 확인 필요" },
+        { t: "—",     x: "Swimming WA 기상 공지(11/17): 토·일 일정을 서로 옮길 수 있다고 안내 — 변경은 ows@wa.swimming.org.au 메일로만 오니 11/20~21 아침 메일 확인" }
       ]
     },
     {
       date: "2026-11-22", dow: "일", tz: "AWST", city: "로킹엄",
       title: "로킹엄 — 15:00 제트스키 30분",
-      weather: "대체로 흐림, 14~18℃, 오후 강수 0%, 바람 18km/h", weatherAt: "2026-11-18",
+      weather: "대체로 흐림, 14~18℃, 오후 강수 0%, 바람 19km/h", weatherAt: "2026-11-18",
       badge: "확정", badgeKind: "done",
       items: [
         { t: "14:00", x: "제트스키 업체에 날씨 확인 전화 (+61 450 538 754)" },
@@ -100,7 +102,7 @@ window.TRIP = {
     {
       date: "2026-11-23", dow: "월", tz: "AWST", city: "줄리언 베이",
       title: "줄리언 베이 바다사자 수영 07:00~09:30",
-      weather: "맑음·바람 잔잔, 14~20℃, 강수 0%, UV 9", weatherAt: "2026-11-18",
+      weather: "구름 조금, 15~20℃, 강수 34%(오전 0%), 바람 9~14km/h, UV 8", weatherAt: "2026-11-18",
       badge: "", badgeKind: "",
       items: [
         { t: "04:00", x: "쿠지 출발 (편도 2.5시간)" },
@@ -112,7 +114,7 @@ window.TRIP = {
     {
       date: "2026-11-24", dow: "화", tz: "AWST → AEDT (UTC+11)", city: "시드니",
       title: "퍼스 → 시드니, 하버브리지 트와일라잇 등반",
-      weather: "시드니: 구름 많고 저녁 이슬비 가능, 16~22℃, 강수 43%, UV 9", weatherAt: "2026-11-18",
+      weather: "시드니: 구름 많고 저녁 이슬비 가능(강수 12%), 17~23℃, UV 9, 등반 시간 바람 17~20km/h", weatherAt: "2026-11-18",
       badge: "", badgeKind: "",
       items: [
         { t: "06:00", x: "쿠지 체크아웃 → 06:30 렌트카 무인 반납 (국제운전면허증·실물 신용카드 필요)" },
@@ -125,7 +127,7 @@ window.TRIP = {
     {
       date: "2026-11-25", dow: "수", tz: "AEDT", city: "시드니",
       title: "본다이 런클럽 + 본다이 아이스버그 수영",
-      weather: "흐림, 16~21℃, 오전 이슬비 가능(강수 10%), UV 6", weatherAt: "2026-11-18",
+      weather: "흐림, 16~21℃, 낮 강수 0%, UV 6", weatherAt: "2026-11-18",
       badge: "", badgeKind: "",
       items: [
         { t: "06:15", x: "Bondi Beach Run Club (Bondi Surf Bathers' SLSC 앞, 무료·사전신청 없음, 브론테 5km 왕복) — 확정" },
@@ -136,7 +138,7 @@ window.TRIP = {
     {
       date: "2026-11-26", dow: "목", tz: "AEDT → AEST (UTC+10)", city: "선샤인코스트",
       title: "시드니 → 선샤인코스트, 노사 돌고래 사파리",
-      weather: "이슬비 가능, 19~25℃, 강수 53%, 마루치도어 기준", weatherAt: "2026-11-18",
+      weather: "이슬비 가능, 19~25℃, 강수 40%(보트 시간대 9%), 보트 시간대 바람 24km/h", weatherAt: "2026-11-18",
       badge: "확정", badgeKind: "done",
       items: [
         { t: "08:10", x: "VA485 시드니 T2 → MCY 08:45 (좌석 24F) · 코튼 트리 에어비앤비 확정" },
@@ -150,7 +152,7 @@ window.TRIP = {
     {
       date: "2026-11-27", dow: "금", tz: "AEST", city: "브리즈번",
       title: "칼룬드라 스카이다이빙 14,000ft → 브리즈번",
-      weather: "칼룬드라 오전 맑음, 20~24℃, 낮 강수 50%, UV 11", weatherAt: "2026-11-18",
+      weather: "칼룬드라 흐리고 이슬비 가능(09시 강수 11%), 21~24℃, UV 5, 오전 바람 17~19km/h", weatherAt: "2026-11-18",
       badge: "숙소 확정", badgeKind: "done",
       items: [
         { t: "08:15", x: "코튼트리 체크아웃" },
@@ -178,8 +180,8 @@ window.TRIP = {
       official: "OWS Series Round 2 Coogee 10km",
       place: "호주 퍼스 Coogee Beach",
       event: "오픈워터", distance: 10, distanceUnit: "km",
-      temp: "", weather: { text: "이슬비 가능 15~19℃, 강수 45%, 오전 바람 24~27km/h", at: "2026-11-18" },
-      condition: "", note: "배번·수모·타이밍칩은 당일 06:00~07:00 해변 등록 텐트(6 Powell Rd)에서만 수령 — 11/20 사전 수령 없음"
+      temp: "", weather: { text: "이슬비 가능 15~19℃, 대회 시간대(06~12시) 강수 0~8%·바람 22→31km/h, UV 8", at: "2026-11-18" },
+      condition: "", note: "등록 06:00 오픈·10km는 07:00 마감(6 Powell Rd 텐트) → 07:00 브리핑 → 07:25 웨이브 출발, 코스 #1 1.25km 8바퀴. 11/17 기상 공지로 토·일 일정이 바뀔 수 있어 ows@wa.swimming.org.au 메일 확인"
     },
     {
       id: "au-2026-10", status: "기록 미입력", badgeKind: "warn",
@@ -205,7 +207,7 @@ window.TRIP = {
     { id: "t-noosa",    label: "🐬 노사 돌고래 사파리 당일 아침 운항 확인 (0438 386 255)", due: "11/26 오전" },
     { id: "t-kbus",     label: "🚌 K-BUS 인천공항 → 부산역 예매 (23:40편)", due: "11/23 전" },
     { id: "t-bridge",   label: "🧭 하버브리지 건강확인서 자가 체크 작성", due: "11/24 전" },
-    { id: "t-timetable", label: "🕐 쿠지 10km 최종 시간표·일정 변동 공지 확인", due: "11/20" },
+    { id: "t-timetable", label: "🕐 쿠지 10km 일정 변경 공지 확인 (ows@ 메일, 11/20~21 아침)", due: "11/21 05:00" },
     { id: "t-dolphin",  label: "🐬 로킹엄 돌고래 수영 — 기상 취소, A$242.55 전액 환불(11/18)", due: "완료" },
     { id: "t-jetski",   label: "🚤 로킹엄 제트스키 30분 — 예약·결제·면책동의서", due: "완료" },
     { id: "t-bnb27",    label: "🏨 브리즈번 숙소 — Holiday Inn Express Brisbane Central 예약", due: "완료" },
