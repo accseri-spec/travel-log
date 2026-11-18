@@ -83,7 +83,7 @@ window.TRIP = {
       items: [
         { t: "06:00", x: "Coogee Beach 등록 텐트(6 Powell Rd)에서 06:00~07:00 사이 이름과 10km를 말하고 수모(일반부 빨강)·배번·넘버타투·타이밍칩 수령" },
         { t: "—",     x: "OWS Series Round 2 Coogee 10km · 주최측 최종 시간표와 일정 변동 공지 확인 필요" },
-        { t: "—",     x: "행사장 상공 드론 금지 · 바람 37km/h 예보라 해상 상태 확인 필요" }
+        { t: "—",     x: "행사장 상공 드론 금지 · 오전 바람 24~27km/h 예보라 해상 상태 확인 필요" }
       ]
     },
     {
@@ -203,10 +203,10 @@ window.TRIP = {
     { id: "t-bridge",   label: "🧭 하버브리지 건강확인서 자가 체크 작성", due: "11/24 전" },
     { id: "t-timetable", label: "🕐 쿠지 10km 최종 시간표·일정 변동 공지 확인", due: "11/20" },
     { id: "t-syd25",    label: "🌆 11/25 오후 일정 정하기 (시내 관광 또는 글렌워스 밸리)", due: "11/24" },
-    { id: "t-dolphin",  label: "🐬 로킹엄 돌고래 수영 — 기상 취소, A$242.55 전액 환불 완료(11/18)", due: "완료" },
-    { id: "t-jetski",   label: "🚤 로킹엄 제트스키 30분 — 예약 확정·결제·면책동의서 완료", due: "완료" },
-    { id: "t-bnb27",    label: "🏨 브리즈번 숙소 — Holiday Inn Express Brisbane Central 예약 완료", due: "완료" },
-    { id: "t-return",   label: "✈️ JQ53 귀국편 — AU$1,380.80 결제·발권 완료", due: "완료" }
+    { id: "t-dolphin",  label: "🐬 로킹엄 돌고래 수영 — 기상 취소, A$242.55 전액 환불(11/18)", due: "완료" },
+    { id: "t-jetski",   label: "🚤 로킹엄 제트스키 30분 — 예약·결제·면책동의서", due: "완료" },
+    { id: "t-bnb27",    label: "🏨 브리즈번 숙소 — Holiday Inn Express Brisbane Central 예약", due: "완료" },
+    { id: "t-return",   label: "✈️ JQ53 귀국편 — AU$1,380.80 결제·발권", due: "완료" }
   ],
 
   checklist: [
