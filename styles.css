@@ -356,9 +356,11 @@ ul.plain li{margin:.18rem 0}
 }
 
 /* ---------- 지난 여행 기록 (아카이브 · 접었다 펴기) ---------- */
-.pasttrip summary{display:block;cursor:pointer;list-style-position:outside}
+.pasttrip summary{display:block;cursor:pointer;list-style:none}
+.pasttrip summary::-webkit-details-marker{display:none}
 .pasttrip summary .overline,.pasttrip summary .title,.pasttrip summary .meta{display:block}
-.pasttrip summary::marker{color:var(--teal);font-weight:800}
+.pasttrip summary .overline::after{content:"  ▾ 펼치기";color:var(--muted);font-weight:700}
+.pasttrip[open] summary .overline::after{content:"  ▴ 접기"}
 .pasttrip[open] summary{margin-bottom:.5rem;padding-bottom:.5rem;border-bottom:1px dashed var(--line)}
 .pasttrip .day-body{padding:0}
 .pasttrip h3.sub{margin-top:.9rem}
