@@ -2145,7 +2145,7 @@ var WORKOUT_DATA = {
       "date": "2026-06-14",
       "time": "08:26",
       "sport": "walk",
-      "place": "Hengchun Township 보행",
+      "place": "Hengchun Township",
       "seconds": 3838.0,
       "hrAvg": 75,
       "hrMax": 101,
@@ -2160,7 +2160,7 @@ var WORKOUT_DATA = {
       "date": "2026-06-13",
       "time": "20:50",
       "sport": "walk",
-      "place": "Hengchun Township 보행",
+      "place": "Hengchun Township",
       "seconds": 1786.0,
       "hrAvg": 84,
       "hrMax": 117,
@@ -2188,7 +2188,7 @@ var WORKOUT_DATA = {
       "date": "2026-06-12",
       "time": "19:18",
       "sport": "walk",
-      "place": "Magong City 보행",
+      "place": "Magong City",
       "seconds": 3337.0,
       "hrAvg": 75,
       "hrMax": 123,
@@ -2196,15 +2196,15 @@ var WORKOUT_DATA = {
       "distanceKm": 2.41,
       "pace": "23:03 /km",
       "extra": "걸음 2,982 · 케이던스 45 · 상승 15 m · 하강 18 m · 이동 시간 25:32 · 랩 3",
-      "coach": "2.41 km · 55:37 · 23:03/km, 심박 75bpm. 저녁 관광 걷기입니다. 하루에 걷기가 여러 건 올라온 날은 합쳐서 보시는 게 좋습니다 — 이날은 총 12.9 km를 걸으셨습니다.",
-      "fact": "이날(6/12) 걷기 6건 합계 21.37 km · 6시간 55분."
+      "coach": "2.41 km · 55:37 · 23:03/km, 심박 75bpm. 저녁 관광 걷기입니다. 하루에 걷기가 여러 건 올라온 날은 합쳐서 보시는 게 좋습니다 — 이날은 6건 21.37 km를 걸으셨습니다.",
+      "fact": "이날(6/12) 걷기 6건 합계 21.37 km · 7시간 25분."
     },
     {
       "id": "2026-06-12-1802-walk",
       "date": "2026-06-12",
       "time": "18:02",
       "sport": "walk",
-      "place": "Magong City 보행",
+      "place": "Magong City",
       "seconds": 611.0,
       "hrAvg": 87,
       "hrMax": 98,
@@ -2213,14 +2213,14 @@ var WORKOUT_DATA = {
       "pace": "22:10 /km",
       "extra": "걸음 726 · 케이던스 63 · 상승 4 m · 하강 10 m · 이동 시간 6:37",
       "coach": "0.46 km · 10:11, 심박 87bpm. 짧은 이동 기록입니다. 대만 여행 중이라 이런 자잘한 걷기가 여러 건 올라왔는데, 훈련량으로는 잡지 않았습니다.",
-      "fact": "이날(6/12) 걷기 6건 합계 21.37 km."
+      "fact": "이날(6/12) 걷기 6건 합계 21.37 km · 7시간 25분."
     },
     {
       "id": "2026-06-12-1456-walk",
       "date": "2026-06-12",
       "time": "14:56",
       "sport": "walk",
-      "place": "Magong City 보행",
+      "place": "Magong City",
       "seconds": 7882.0,
       "hrAvg": 92,
       "hrMax": 124,
@@ -2229,14 +2229,14 @@ var WORKOUT_DATA = {
       "pace": "17:30 /km",
       "extra": "걸음 10,688 · 케이던스 73 · 상승 78 m · 하강 58 m · 이동 시간 1:30:08 · 랩 8",
       "coach": "7.5 km를 2시간 11분 — 17:30/km, 심박 92bpm, 걸음 10,688. 이날 두 번째로 긴 걷기입니다. 관광지 이동이지만 두 시간 넘게 계속 걸으셨으니 지구력 면에서는 확실히 도움이 됩니다.",
-      "fact": "이날(6/12) 걷기 6건 합계 21.37 km."
+      "fact": "이날(6/12) 걷기 6건 합계 21.37 km · 7시간 25분."
     },
     {
       "id": "2026-06-12-1247-walk",
       "date": "2026-06-12",
       "time": "12:47",
       "sport": "walk",
-      "place": "Magong City 보행",
+      "place": "Magong City",
       "seconds": 1811.0,
       "hrAvg": 76,
       "hrMax": 106,
@@ -2245,14 +2245,14 @@ var WORKOUT_DATA = {
       "pace": "43:11 /km",
       "extra": "걸음 1,070 · 케이던스 32 · 상승 1 m · 하강 9 m · 이동 시간 9:09",
       "coach": "0.7 km에 30분 — 43:11/km, 심박 76bpm. 서 있거나 아주 천천히 움직인 기록입니다. 펑후 여행 중 점심 무렵이라 더위 때문에 속도가 나지 않은 것으로 보입니다.",
-      "fact": "이날(6/12) 걷기 6건 합계 21.37 km."
+      "fact": "이날(6/12) 걷기 6건 합계 21.37 km · 7시간 25분."
     },
     {
       "id": "2026-06-12-1157-walk",
       "date": "2026-06-12",
       "time": "11:57",
       "sport": "walk",
-      "place": "Magong City 보행",
+      "place": "Magong City",
       "seconds": 2438.0,
       "hrAvg": 86,
       "hrMax": 115,
@@ -2260,15 +2260,15 @@ var WORKOUT_DATA = {
       "distanceKm": 1.55,
       "pace": "26:10 /km",
       "extra": "걸음 2,334 · 케이던스 47 · 상승 16 m · 하강 7 m · 이동 시간 19:46 · 랩 2",
-      "coach": "1.55 km · 40:38 · 26:10/km, 심박 86bpm. 점심 전 짧은 이동입니다. 이날 걷기 5건을 합치면 12.9 km — 여행지에서 생각보다 많이 걷고 계십니다.",
-      "fact": "이날(6/12) 걷기 6건 합계 21.37 km."
+      "coach": "1.55 km · 40:38 · 26:10/km, 심박 86bpm. 점심 전 짧은 이동입니다. 이날 걷기 6건을 합치면 21.37 km — 여행지에서 생각보다 많이 걷고 계십니다.",
+      "fact": "이날(6/12) 걷기 6건 합계 21.37 km · 7시간 25분."
     },
     {
       "id": "2026-06-12-0900-walk",
       "date": "2026-06-12",
       "time": "09:00",
       "sport": "walk",
-      "place": "Magong City 보행",
+      "place": "Magong City",
       "seconds": 10610.0,
       "hrAvg": 87,
       "hrMax": 133,
@@ -2277,14 +2277,14 @@ var WORKOUT_DATA = {
       "pace": "20:12 /km",
       "extra": "걸음 7,466 · 케이던스 34 · 상승 78 m · 하강 81 m · 이동 시간 1:12:09 · 랩 9",
       "coach": "8.75 km를 2시간 56분 — 20:12/km, 심박 87bpm, 걸음 7,466, 상승 78 m. 이날 가장 긴 걷기이고 오전에 이미 3시간을 걸으셨습니다. 펑후 여행 둘째 날 아침 컨디션이 좋았다는 뜻이니, 대회 전날에도 이 정도로 가볍게 걷는 건 문제 없습니다.",
-      "fact": "이날(6/12) 걷기 6건 합계 21.37 km."
+      "fact": "이날(6/12) 걷기 6건 합계 21.37 km · 7시간 25분."
     },
     {
       "id": "2026-06-11-2152-walk",
       "date": "2026-06-11",
       "time": "21:52",
       "sport": "walk",
-      "place": "Magong City 보행",
+      "place": "Magong City",
       "seconds": 1892.0,
       "hrAvg": 76,
       "hrMax": 123,
