@@ -177,7 +177,7 @@
     var el = document.getElementById("monthTotal");
     if (!el) return;
     el.innerHTML =
-      "<div class=\"totalhead\"><span>이번 달 합계</span><em>11월 · 1~16일</em></div>" +
+      "<div class=\"totalhead\"><span>이번 달 합계</span><em>11월 · 1~18일</em></div>" +
       "<div class=\"tgrid\">" +
         tcell("총 거리", km(t.swim.km + t.run.km), "km") +
         tcell("운동 시간", fmtDur(t.seconds), "") +
@@ -639,7 +639,7 @@
     var has = {};
     all.forEach(function (r) { has[r.date] = true; });
     var empty = D.days.filter(function (d) { return !has[d.date]; });
-    if (!empty.length) { box.innerHTML = "<div class=\"card empty\">11/1~11/16 모든 날에 기록이 있습니다.</div>"; return; }
+    if (!empty.length) { box.innerHTML = "<div class=\"card empty\">11/1~11/18 모든 날에 기록이 있습니다.</div>"; return; }
     box.innerHTML = empty.map(function (d) {
       var id = "day-" + d.date;
       return "<article class=\"rec\" data-date=\"" + esc(d.date) + "\" data-sport=\"-\">" +

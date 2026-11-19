@@ -9,7 +9,7 @@
 | --- | --- |
 | `index.html` | 화면 뼈대 (대회 D-day, 달력·합계·여닫이 요약, 월별 차트, 개인 최고·3K 페이스 비교, 11월 기록) |
 | `styles.css` | 모바일 우선 스타일, "가+ 큰 글씨" 모드 |
-| `data.js` | 가민에서 옮긴 초기 데이터(월별 누적·개인 최고·11월 기록 10건) |
+| `data.js` | 가민에서 옮긴 초기 데이터(월별 누적·개인 최고·11월 기록 11건) |
 | `app.js` | D-day 접기/펼치기, 달력(날짜 터치 이동), SVG 막대 차트, 종목 필터, 코치 코멘트, 메모·직접 입력 저장, 백업/복원 |
 | `.nojekyll` | GitHub Pages가 파일을 그대로 올리도록 하는 표식 |
 
@@ -18,7 +18,8 @@
 - `workout-log/source/garmin-swim_2026-04-01_2026-11-16.csv` — 수영 128건, 월별 집계
 - `workout-log/source/garmin-running_2026-04-01_2026-11-16.csv` — 러닝 40건(3월 이동경로 2건 제외)
 - `workout-log/source/garmin-activities_2026-11_recent20.csv` — 11월 상세 10건(심박·칼로리·랩·SWOLF)
-- 마지막 동기화 2026-11-16 10:40
+- `workout-log/source/garmin-activities_2026-11-18.csv` — 11/18 풀 수영 1건(1,725 m·SWOLF 35)
+- 마지막 동기화 2026-11-18 22:00
 
 ## 기기에 저장되는 것
 
