@@ -12,7 +12,7 @@
 window.TRIP = {
   name: "김상진",
   title: "김상진님의 평생 여행 로그",
-  updated: "2026-11-18",
+  updated: "2026-11-19",
 
   countries: [
     { code: "KOR", name: "대한민국", state: "거주지 · 출발지", cls: "home", cities: "부산 (집)" },
@@ -52,7 +52,7 @@ window.TRIP = {
     period: "2026-11-19 ~ 11-28",
     route: "부산 → 싱가포르 경유 → 퍼스·쿠지 → 시드니 → 선샤인코스트 → 브리즈번",
     places: "싱가포르(경유) · 퍼스·쿠지 · 시드니 · 선샤인코스트 · 브리즈번",
-    activities: "쿠지 10km 오픈워터 · 바다사자 수영 · 하버브리지 트와일라잇 등반 · 본다이 런클럽 · 노사 돌고래 사파리 · 스카이다이빙 14,000ft"
+    activities: "바다사자 수영 · 하버브리지 트와일라잇 등반 · 본다이 런클럽 · 노사 돌고래 사파리 · 스카이다이빙 14,000ft (쿠지 10km는 기상으로 연기·불참)"
   },
 
   days: [
@@ -81,16 +81,14 @@ window.TRIP = {
       ]
     },
     {
-      date: "2026-11-21", dow: "토", tz: "AWST", city: "쿠지",
-      title: "쿠지 비치 10km 오픈워터 대회",
-      weather: "이슬비 가능·오전 강풍, 15~19℃, 대회 시간대(06~12시) 강수 0~8%, 바람 22→31km/h", weatherAt: "2026-11-18",
-      badge: "대회", badgeKind: "race",
+      date: "2026-11-21", dow: "토", tz: "AWST", city: "퍼스·쿠지",
+      title: "쿠지 비치 — 자유 일정 (대회 연기)",
+      weather: "이슬비 가능·오전 강풍, 15~19℃, 강수 0~8%, 바람 22→31km/h", weatherAt: "2026-11-18",
+      badge: "", badgeKind: "",
       items: [
-        { t: "06:00", x: "Coogee Beach 등록 텐트(6 Powell Rd, 06:00 오픈) — 10km는 07:00 마감(2.5km만 07:15). 이름과 10km를 말하고 수모(10km 일반부 빨강)·배번·넘버타투·타이밍칩 수령. 늦으면 출전 불가" },
-        { t: "—",     x: "타이밍칩은 손목(발목 금지) · 넘버타투는 왼쪽 어깨와 오른쪽 팔뚝에 자외선 차단제보다 먼저" },
-        { t: "07:00", x: "10km 브리핑(Entry Chute) → 07:25 10km 웨이브 출발 · 코스 #1(1.25km 8바퀴), 수온 18℃ 미만이면 웻수트 필요(당일 아침 수온 발표)" },
-        { t: "—",     x: "행사장 상공 드론 금지 · 대회 시간대 바람 22→31km/h 강풍 예보라 해상 상태 확인 필요" },
-        { t: "—",     x: "Swimming WA 기상 공지(11/17): 토·일 일정을 서로 옮길 수 있다고 안내 — 변경은 ows@wa.swimming.org.au 메일로만 오니 11/20~21 아침 메일 확인" }
+        { t: "—",     x: "쿠지 10km 대회는 기상 예보 악화로 11/28(토)로 연기 (Swimming WA 공지 11/19 10:52) — 11/28은 귀국일(JQ53 브리즈번 11:05)과 겹쳐 불참, 참가비 A$94.00 전액 환불 요청 메일 발송(11/19)" },
+        { t: "오전",   x: "자유 일정 — 쿠지 해변에서 아침 수영·산책 (정해 둔 일정 없음)" },
+        { t: "오후",   x: "자유 일정 — 퍼스 시내·해변 둘러보기 등 원하는 대로" }
       ]
     },
     {
@@ -180,13 +178,15 @@ window.TRIP = {
 
   competitions: [
     {
-      id: "coogee-10k", status: "예정", badgeKind: "race",
-      date: "2026-11-21", name: "쿠지 비치 10km 오픈워터",
-      official: "OWS Series Round 2 Coogee 10km",
+      id: "coogee-10k", status: "불참 · 환불 요청", badgeKind: "", skip: true,
+      date: "2026-11-28", name: "쿠지 비치 10km 오픈워터",
+      official: "OWS Series Round 2 Coogee 10km — 11/21에서 11/28로 연기",
       place: "호주 퍼스 Coogee Beach",
       event: "오픈워터", distance: 10, distanceUnit: "km",
-      temp: "", weather: { text: "이슬비 가능 15~19℃, 대회 시간대(06~12시) 강수 0~8%·바람 22→31km/h, UV 8", at: "2026-11-18" },
-      condition: "", note: "등록 06:00 오픈·10km는 07:00 마감(6 Powell Rd 텐트) → 07:00 브리핑 → 07:25 웨이브 출발, 코스 #1 1.25km 8바퀴. 11/17 기상 공지로 토·일 일정이 바뀔 수 있어 ows@wa.swimming.org.au 메일 확인"
+      temp: "", weather: { text: "원래 대회일(11/21) 예보는 15~19℃·대회 시간대 강수 0~8%였으나 기상 악화로 11/28 연기", at: "2026-11-18" },
+      condition: "",
+      summary: "쿠지 비치 10km — 기상으로 11/28 연기, 귀국일과 겹쳐 불참 (A$94.00 전액 환불 요청)",
+      note: "11/21·22 이틀 예정이던 대회가 기상 예보 악화로 11/28(토) 하루(06:30~12:00 예상)로 연기됐고 기존 등록은 자동 이전됐습니다. 11/28은 JQ53 브리즈번 11:05 귀국편과 겹쳐 참가할 수 없어 주최측(ows@wa.swimming.org.au)에 해외 귀국 일정 사유를 적어 참가비 A$94.00 전액 환불을 요청한 상태입니다(2026-11-19 발송, 회신 대기). 대회 기록은 없습니다."
     },
     {
       id: "au-2026-10", status: "기록 미입력", badgeKind: "warn",
@@ -410,7 +410,7 @@ window.TRIP = {
     { id: "t-noosa",    label: "🐬 노사 돌고래 사파리 당일 아침 운항 확인 (0438 386 255)", due: "11/26 오전" },
     { id: "t-kbus",     label: "🚌 K-BUS 인천공항 → 부산역 예매 (23:40편)", due: "11/23 전" },
     { id: "t-bridge",   label: "🧭 하버브리지 건강확인서 자가 체크 작성", due: "11/24 전" },
-    { id: "t-timetable", label: "🕐 쿠지 10km 일정 변경 공지 확인 (ows@ 메일, 11/20~21 아침)", due: "11/21 05:00" },
+    { id: "t-coogee",  label: "🏊 쿠지 10km — 기상으로 11/28 연기, 귀국일과 겹쳐 불참·A$94.00 전액 환불 요청", due: "완료" },
     { id: "t-dolphin",  label: "🐬 로킹엄 돌고래 수영 — 기상 취소, A$242.55 전액 환불(11/18)", due: "완료" },
     { id: "t-jetski",   label: "🚤 로킹엄 제트스키 30분 — 예약·결제·면책동의서", due: "완료" },
     { id: "t-bnb27",    label: "🏨 브리즈번 숙소 — Holiday Inn Express Brisbane Central 예약", due: "완료" },
@@ -418,8 +418,8 @@ window.TRIP = {
   ],
 
   checklist: [
-    { group: "수영 필수 (11/21 쿠지 10km)", items: [
-      { id: "c-swimcap", label: "🏊 수모 (대회용은 당일 수령 · 연습용은 따로)" },
+    { group: "수영 필수 (바다 수영·연습)", items: [
+      { id: "c-swimcap", label: "🏊 수모 (연습용)" },
       { id: "c-goggles", label: "🥽 고글 (예비 1개 포함)" },
       { id: "c-suit",    label: "🩱 수영복" },
       { id: "c-warm",    label: "🧥 완주 후 방한 용품 (바람막이·보온 병·수건)" },
@@ -480,7 +480,7 @@ window.TRIP = {
     { id: "b-scoot",    what: "SQ8494(스쿠트 TR52) 창이 → 퍼스",       prov: "스쿠트 · 좌석 25A · 온라인 체크인 완료", when: "11/20" },
     { id: "b-car",      what: "렌트카 Redspot MG3",                    prov: "DiscoverCars · A$333.44 결제 완료 · QuickerCheckout 체크인 완료, 보증금 A$100 사전승인", when: "11/20~24" },
     { id: "b-coogee",   what: "쿠지 숙소",                             prov: "Airbnb · 호스트 Andrea", when: "11/20~24" },
-    { id: "b-race",     what: "쿠지 10km 대회 등록",                   prov: "OWS Series Round 2 · 등록 완료", when: "11/21" },
+    { id: "b-race",     what: "쿠지 10km 대회 등록 (불참)",              prov: "OWS Series Round 2 · 11/28로 연기 → 귀국일과 겹쳐 불참, A$94.00 전액 환불 요청(11/19)", when: "11/21 → 11/28" },
     { id: "b-rockingham", what: "로킹엄 제트스키 30분",               prov: "A$137.09 결제 완료 · 면책동의서 서명 완료", when: "11/22" },
     { id: "b-sealion",  what: "바다사자 수영",                         prov: "Jurien Bay Oceanic Experience · AU$233.35 결제 완료", when: "11/23" },
     { id: "b-qf644",    what: "QF644 퍼스 → 시드니",                   prov: "콴타스", when: "11/24" },

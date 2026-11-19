@@ -550,7 +550,7 @@
     var photos = photoCount();
     var visitedCountries = T.countries.filter(function (c) { return c.cls === "home" || c.cls === "visited"; }).length;
     var ausCities = T.cities.filter(function (c) { return c.visit; }).length;
-    var upcoming = comps.filter(function (c) { var n = daysUntil(c.date); return n != null && n >= 0; }).length;
+    var upcoming = comps.filter(function (c) { var n = daysUntil(c.date); return n != null && n >= 0 && !c.skip; }).length;
 
     function stat(k, v, unit, note) {
       return '<div class="stat"><div class="k">' + k + '</div><div class="v">' + v + (unit ? "<small>" + unit + "</small>" : "") + "</div>" + (note ? '<div class="n">' + note + "</div>" : "") + "</div>";
@@ -567,7 +567,8 @@
   }
 
   function renderDDay() {
-    var comps = allComps().filter(function (c) { return parseDate(c.date); });
+    /* 연기·불참으로 끝난 대회(c.skip)는 다음 대회 D-day에서 뺍니다 */
+    var comps = allComps().filter(function (c) { return parseDate(c.date) && !c.skip; });
     comps.sort(function (a, b) { return parseDate(a.date) - parseDate(b.date); });
     var html = "", shown = 0;
     comps.forEach(function (c) {
@@ -1010,12 +1011,13 @@
       var n = c.date ? daysUntil(c.date) : null;
       var card = document.createElement("article");
       card.className = "day";
-      var statusBadge = c.time ? '<span class="badge done">완주 기록</span>'
+      var statusBadge = c.skip ? '<span class="badge warn">' + esc(c.status || "불참") + '</span>'
+        : c.time ? '<span class="badge done">완주 기록</span>'
         : (c.status === "기록 미입력" ? '<span class="badge warn">기록 미입력</span>'
           : (n != null && n >= 0 ? '<span class="badge race">예정</span>'
             : (n != null && n < 0 ? '<span class="badge warn">지난 대회</span>' : '<span class="badge">목표</span>')));
       card.innerHTML =
-        '<div class="day-head"><div class="day-date"><div class="d">' + (c.date ? c.date.slice(5).replace("-", "/") : "—") + '</div><div class="w">' + esc(n == null ? "날짜 미입력" : ddayText(n)) + "</div></div>" +
+        '<div class="day-head"><div class="day-date"><div class="d">' + (c.date ? c.date.slice(5).replace("-", "/") : "—") + '</div><div class="w">' + esc(c.skip ? "불참" : (n == null ? "날짜 미입력" : ddayText(n))) + "</div></div>" +
         '<div style="min-width:0"><div class="day-title">' + esc(c.name) + statusBadge + "</div>" +
         '<div class="day-sub">' + esc(c.official || "대회명 미입력") + " · " + esc(c.place) + "</div></div></div>" +
         '<div class="day-body">' +
@@ -1196,13 +1198,17 @@
   /* ---------------- 한 장 요약 ---------------- */
   function summaryRows() {
     var comps = allComps();
-    var race = comps.filter(function (c) { return c.badgeKind === "race"; })[0] || comps[0];
+    var race = comps.filter(function (c) { return String(c.date || "").slice(0, 7) === "2026-11" && (c.badgeKind === "race" || c.skip); })[0] || comps[0];
     var racePhotos = race && S.comps[race.id] && S.comps[race.id].photos ? S.comps[race.id].photos.filter(Boolean).length : 0;
+    /* 연기·불참한 대회는 기록 대신 그 경위를 한 줄로 적습니다 */
+    var raceLine = !race ? "(미입력)"
+      : (race.skip ? (race.summary || (race.name + " — 불참"))
+        : race.name + " — 기록 " + (race.time || "(미입력)") + " · 사진 " + racePhotos + "/5");
     var journalDays = T.days.filter(function (d) { var v = S.days[d.date]; return v && v.journal && v.journal.trim(); }).length;
     var km = totalKm();
     return [
       ["다녀온 곳", T.trip.places],
-      ["수영대회", race ? race.name + " — 기록 " + (race.time || "(미입력)") + " · 사진 " + racePhotos + "/5" : "(미입력)"],
+      ["수영대회", raceLine],
       ["액티비티", T.trip.activities],
       ["일지", journalDays + "일 기록 · 사진 " + photoCount() + "/" + photoCapacity()],
       ["누적 수영", km ? km + " km" : "0 km (완주 기록 입력 전)"],
@@ -1218,7 +1224,7 @@
       '<div class="when">' + esc(T.trip.period) + " · 9박 10일</div>" +
       rows.filter(function (r) { return r[0].indexOf("순간") < 0 && r[0].indexOf("소감") < 0; })
         .map(function (r) { return '<div class="sum-row"><div class="k">' + esc(r[0]) + '</div><div class="v">' + esc(r[1]) + "</div></div>"; }).join("") +
-      '<label class="lbl">가장 기억에 남는 순간<input type="text" id="sumMoment" value="' + esc(S.summary.moment || "") + '" placeholder="예: 쿠지 바다 마지막 1km"></label>' +
+      '<label class="lbl">가장 기억에 남는 순간<input type="text" id="sumMoment" value="' + esc(S.summary.moment || "") + '" placeholder="예: 노사 보트에서 만난 돌고래"></label>' +
       '<label class="lbl">한 줄 소감<input type="text" id="sumLine" value="' + esc(S.summary.line || "") + '" placeholder="예: 바람과 파도가 다 이겨 줬다"></label>' +
       '<p class="sum-note">가족에게 보여 줄 한 장 요약입니다. 여권번호·연락처·숙소 상세 주소·예약 코드는 담기지 않습니다.</p></div>';
     $("#summaryModal").hidden = false;
