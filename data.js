@@ -422,7 +422,7 @@ window.TRIP = {
       { id: "c-swimcap", label: "🏊 수모 (연습용)" },
       { id: "c-goggles", label: "🥽 고글 (예비 1개 포함)" },
       { id: "c-suit",    label: "🩱 수영복" },
-      { id: "c-warm",    label: "🧥 완주 후 방한 용품 (바람막이·보온 병·수건)" },
+      { id: "c-warm",    label: "🧥 수영 후 방한 용품 (바람막이·보온 병·수건)" },
       { id: "c-garmin",  label: "⌚ 가민 워치 (충전 케이블 포함)" }
     ]},
     { group: "여행 서류", items: [
