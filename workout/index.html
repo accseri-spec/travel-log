@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#0F352E">
-<meta name="description" content="상진의 운동 로그 — 가민 커넥트 수영·러닝·근력 기록, 월별 훈련량과 개인 최고 기록, 코치 코멘트.">
+<meta name="description" content="상진의 운동 로그 — 가민 커넥트 수영·러닝·걷기·하이킹·근력 기록, 월별 훈련량과 개인 최고 기록, 코치 코멘트.">
 <title>상진의 운동 로그</title>
-<link rel="stylesheet" href="styles.css?v=20261119a">
+<link rel="stylesheet" href="styles.css?v=20261120b">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%8A%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -29,7 +29,7 @@
     <button class="tab is-active" data-target="sec-summary" type="button">① 요약·D-day</button>
     <button class="tab" data-target="sec-monthly" type="button">② 월별 훈련량</button>
     <button class="tab" data-target="sec-pr" type="button">③ 개인 최고</button>
-    <button class="tab" data-target="sec-records" type="button">④ 11월 기록</button>
+    <button class="tab" data-target="sec-records" type="button">④ 날짜별 기록</button>
   </nav>
 </header>
 
@@ -51,7 +51,7 @@
     <div class="card calcard">
       <div class="cal-head">
         <h3 id="calSummaryTitle">2026년 11월</h3>
-        <span class="cal-legend"><i class="dot swim"></i>수영<i class="dot run"></i>러닝<i class="dot strength"></i>근력</span>
+        <span class="cal-legend"><i class="dot swim"></i>수영<i class="dot run"></i>러닝<i class="dot walk"></i>걷기<i class="dot hike"></i>하이킹<i class="dot strength"></i>근력</span>
       </div>
       <div class="cal" id="calSummary"></div>
     </div>
@@ -62,14 +62,15 @@
 
     <details class="notes">
       <summary>숫자 읽는 법</summary>
-      <p>수영은 m·km, 러닝은 km, 근력은 거리 대신 시간·세트로 적습니다. 가민에서 일부 러닝 거리가 m로 나와(예: 10/22 트랙 4,770 = 4.77 km) 옮길 때 단위를 확인했고, 3월 이동경로 러닝 2건(782.51 km·301.78 km)은 모든 합계에서 뺐습니다. 칼로리는 기록별 합 5,082 kcal, 가민 월 집계는 5,081 kcal(반올림 차이)입니다.</p>
+      <p>가민에 기록되는 종목을 모두 넣었습니다 — 수영·러닝·걷기·하이킹·근력·멀티스포츠. 수영은 m, 러닝·걷기·하이킹은 km, 근력은 거리 대신 시간·세트로 적습니다. 가민에서 일부 거리가 m로 나와(예: 10/22 트랙 4,770 = 4.77 km) 옮길 때 단위를 확인했습니다.</p>
+      <p>합계에서 뺀 기록: 2026-03 “여행 이동경로~” 러닝 2건(782.51 km·301.78 km), 6/11 보행 11.44 km(걸음 2,262)와 6/13 보행 4.17 km(2:33/km·걸음 8) — 모두 차량 이동이 GPS에 찍힌 기록입니다. 6/13 0 m·1초 보행과 10/24 0 m·11초 하이킹도 뺐습니다. 10/27 멀티스포츠(25.68 km)는 1구간 러닝이 같은 날 별도 러닝 기록과 겹쳐 합계에서 빼고 카드로만 남겼습니다.</p>
     </details>
   </section>
 
   <!-- ② 월별 훈련량 -->
   <section id="sec-monthly">
     <h2 class="sect first">4월 ~ 11월 월별 훈련량</h2>
-    <p class="hint">막대를 누르면 그 달 정확한 수치가 나옵니다. 11월은 1~18일입니다.</p>
+    <p class="hint">막대를 누르면 그 달 정확한 수치가 나옵니다. 11월은 1~19일입니다.</p>
 
     <div class="card chartcard">
       <div class="chart-head">
@@ -89,6 +90,14 @@
 
     <div class="card chartcard">
       <div class="chart-head">
+        <h3>걷기 · 하이킹</h3>
+        <span class="unit">km · 회</span>
+      </div>
+      <div class="chart" id="chartWalk" role="img" aria-label="월별 걷기·하이킹 거리 막대 그래프"></div>
+    </div>
+
+    <div class="card chartcard">
+      <div class="chart-head">
         <h3>근력</h3>
         <span class="unit">회</span>
       </div>
@@ -99,7 +108,7 @@
       <table class="tbl" id="monthlyTable"></table>
     </div>
     <p class="swipehint">표는 옆으로 밀면 합계 거리까지 보입니다.</p>
-    <p class="source">5월 116.1 km는 펑후 10K 직전 피크, 10월 73.0 km는 최장 풀 수영 6,500 m(10/25) 포함. 4·5월 러닝·근력이 빈 것은 하지 않았다는 뜻이 아니라 가민에 기록이 없다는 뜻입니다.</p>
+    <p class="source">5월 116.1 km는 펑후 10K 직전 피크, 10월 73.0 km는 최장 풀 수영 6,500 m(10/25) 포함. 걷기는 6월 대만 여행(6/12 21.4 km)이 가장 많고, 7월·9월·11월은 가민에 걷기 기록이 없습니다. 4·5월 러닝·근력이 빈 것은 하지 않았다는 뜻이 아니라 가민에 기록이 없다는 뜻입니다.</p>
   </section>
 
   <!-- ③ 개인 최고 기록 -->
@@ -131,10 +140,12 @@
     </div>
   </section>
 
-  <!-- ④ 11월 기록 & 직접 입력 -->
+  <!-- ④ 날짜별 기록 & 직접 입력 -->
   <section id="sec-records">
-    <h2 class="sect first">11월 날짜별 기록</h2>
-    <p class="hint">달력에서 날짜를 누르면 그날 기록으로 바로 넘어갑니다.</p>
+    <h2 class="sect first" id="recTitle">날짜별 기록</h2>
+    <p class="hint">달을 고르고, 종목 버튼으로 걸러 봅니다. 달력에서 날짜를 누르면 그날 기록으로 넘어갑니다.</p>
+
+    <div class="months" id="monthChips" role="group" aria-label="달 선택"></div>
 
     <div class="card calcard">
       <div class="cal-head">
@@ -148,20 +159,23 @@
       <button class="chip is-active" data-sport="all" type="button"><span class="ci">📋</span>전체<b id="cAll">0</b></button>
       <button class="chip" data-sport="swim" type="button"><span class="ci">🏊</span>수영<b id="cSwim">0</b></button>
       <button class="chip" data-sport="run" type="button"><span class="ci">🏃</span>러닝<b id="cRun">0</b></button>
+      <button class="chip" data-sport="walk" type="button"><span class="ci">🚶</span>걷기<b id="cWalk">0</b></button>
+      <button class="chip" data-sport="hike" type="button"><span class="ci">🥾</span>하이킹<b id="cHike">0</b></button>
       <button class="chip" data-sport="strength" type="button"><span class="ci">🏋️</span>근력<b id="cStrength">0</b></button>
+      <button class="chip" data-sport="multi" type="button"><span class="ci">🔀</span>멀티<b id="cMulti">0</b></button>
     </div>
 
     <div class="monthsum" id="monthSum"></div>
 
     <div class="stack" id="recordList"></div>
 
-    <h3 class="sect">기록이 없는 날</h3>
+    <h3 class="sect" id="emptyTitle">기록이 없는 날</h3>
     <p class="hint">운동을 안 한 날도 몸 상태를 한 줄 남겨 두세요.</p>
     <div class="stack" id="emptyDays"></div>
 
     <h3 class="sect">새 운동 직접 추가</h3>
     <div class="card addcard">
-      <p class="hint">가민에 아직 없는 기록(예: "저녁 풀 수영 2,000 m 45분")을 적어 두세요. 목록 맨 위에 <b>직접 입력</b> 표시로 붙고 요약 숫자에도 들어갑니다.</p>
+      <p class="hint">가민에 아직 없는 기록(예: "저녁 풀 수영 2,000 m 45분", "아침 해변 걷기 3 km")을 적어 두세요. 목록 맨 위에 <b>직접 입력</b> 표시로 붙고 요약 숫자에도 들어갑니다.</p>
       <form id="addForm" autocomplete="off">
         <div class="grid2">
           <label>날짜
@@ -171,6 +185,8 @@
             <select id="fSport">
               <option value="swim">수영</option>
               <option value="run">러닝</option>
+              <option value="walk">걷기</option>
+              <option value="hike">하이킹</option>
               <option value="strength">근력</option>
             </select>
           </label>
@@ -227,8 +243,8 @@
 <div class="tip" id="tip" role="status" aria-live="polite" hidden></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-<script src="data.js?v=20261120a"></script>
-<script src="app.js?v=20261120a"></script>
+<script src="data.js?v=20261120b"></script>
+<script src="app.js?v=20261120b"></script>
 <script>
 /* 오프라인 사용: 같은 서비스 워커(사이트 최상위)를 써서 여행 로그·운동 로그를 모두 저장합니다. */
 if ('serviceWorker' in navigator) {

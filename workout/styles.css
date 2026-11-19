@@ -11,6 +11,12 @@
   --amber-soft:#FDF1DD;
   --rose:#B4503A;
   --rose-soft:#FBE7E1;
+  --green:#2E8B74;
+  --green-soft:#E1F1EB;
+  --olive:#6E8B2E;
+  --olive-soft:#EFF3DE;
+  --violet:#7A5AA8;
+  --violet-soft:#EFE9F7;
   --bg:#F4F7F6;
   --card:#FFFFFF;
   --line:#E1E7E5;
@@ -118,6 +124,9 @@ section{scroll-margin-top:6.4rem}
 .dot{width:.5rem;height:.5rem;border-radius:50%;display:inline-block;margin:0 .22rem 0 .4rem}
 .dot.swim{background:var(--blue)}
 .dot.run{background:var(--amber)}
+.dot.walk{background:var(--green)}
+.dot.hike{background:var(--olive)}
+.dot.multi{background:var(--violet)}
 .dot.strength{background:var(--rose)}
 .cal{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:.22rem}
 .cw{font-size:.7rem;font-weight:800;color:#93A09A;text-align:center;padding:.1rem 0 .2rem}
@@ -129,6 +138,9 @@ section{scroll-margin-top:6.4rem}
 .cday .dots i{width:.34rem;height:.34rem;border-radius:50%;display:block}
 .cday .dots i.swim{background:var(--blue)}
 .cday .dots i.run{background:var(--amber)}
+.cday .dots i.walk{background:var(--green)}
+.cday .dots i.hike{background:var(--olive)}
+.cday .dots i.multi{background:var(--violet)}
 .cday .dots i.strength{background:var(--rose)}
 .cday.is-rec{background:#E7F1EC;border-color:#D3E5DD;color:var(--deep)}
 .cday.is-empty{color:#93A09A;background:#FBFCFB}
@@ -246,7 +258,22 @@ button.cday:active{transform:scale(.95)}
 
 /* ---------- 필터 (달력 아래 4버튼) ---------- */
 .filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem;margin:.7rem 0 .1rem}
-@media(min-width:30rem){.filters{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:26rem){.filters{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:44rem){.filters{grid-template-columns:repeat(7,minmax(0,1fr))}}
+
+/* 달 선택 (4월 ~ 11월) */
+.months{display:flex;gap:.4rem;overflow-x:auto;padding:.15rem .1rem .5rem;margin:.2rem -.1rem .1rem;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.months::-webkit-scrollbar{display:none}
+.mchip{
+  flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:.05rem;min-width:3.1rem;
+  border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:12px;
+  padding:.4rem .55rem;cursor:pointer;box-shadow:var(--shadow);
+}
+.mchip b{font-size:.92rem;font-weight:800;letter-spacing:-.01em}
+.mchip small{font-size:.66rem;color:#8A9691;font-weight:700}
+.mchip.is-active{background:var(--deep);border-color:var(--deep);color:#fff}
+.mchip.is-active small{color:#9FD6C4}
+.mchip:active{transform:scale(.97)}
 .chip{
   display:flex;align-items:center;justify-content:center;gap:.35rem;min-height:2.95rem;
   border:1px solid var(--line);background:var(--card);color:var(--ink);
@@ -270,6 +297,9 @@ button.cday:active{transform:scale(.95)}
 .icon{width:1.35rem;height:1.35rem;border-radius:8px;display:inline-flex;align-items:center;justify-content:center;font-size:.78rem;flex:0 0 auto}
 .icon.swim{background:var(--blue-soft);color:var(--blue)}
 .icon.run{background:var(--amber-soft);color:#8A5A08}
+.icon.walk{background:var(--green-soft);color:var(--green)}
+.icon.hike{background:var(--olive-soft);color:#4E6415}
+.icon.multi{background:var(--violet-soft);color:var(--violet)}
 .icon.strength{background:var(--rose-soft);color:var(--rose)}
 .rec-body{padding:0 .8rem .75rem}
 .nums{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.4rem .6rem;margin:.15rem 0 .35rem}

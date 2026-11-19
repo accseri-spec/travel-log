@@ -1,17 +1,24 @@
 /* 상진의 운동 로그 — 화면 그리기와 기기 저장
-   외부 라이브러리 없이 혼자 동작합니다(SVG 차트 직접 그림). */
+   외부 라이브러리 없이 혼자 동작합니다(SVG 차트 직접 그림).
+   종목: 수영(swim) · 러닝(run) · 걷기(walk) · 하이킹(hike) · 근력(strength) · 멀티스포츠(multi) */
 (function () {
   "use strict";
 
   var KEY = "workoutlog.v1";
   var D = (typeof WORKOUT_DATA !== "undefined") ? WORKOUT_DATA : window.WORKOUT_DATA;
   var SPORTS = {
-    swim: { name: "수영", icon: "🏊" },
-    run: { name: "러닝", icon: "🏃" },
-    strength: { name: "근력", icon: "🏋️" }
+    swim: { name: "수영", icon: "🏊", color: "#1D5FA8" },
+    run: { name: "러닝", icon: "🏃", color: "#E9A23B" },
+    walk: { name: "걷기", icon: "🚶", color: "#2E8B74" },
+    hike: { name: "하이킹", icon: "🥾", color: "#6E8B2E" },
+    multi: { name: "멀티스포츠", icon: "🔀", color: "#7A5AA8" },
+    strength: { name: "근력", icon: "🏋️", color: "#B4503A" }
   };
+  // 거리로 세는 종목 (걷기·하이킹은 km, 수영은 m)
+  var KM_SPORTS = { run: 1, walk: 1, hike: 1, multi: 1 };
+  var DIST_SPORTS = ["swim", "run", "walk", "hike"];
   var DOW = ["일", "월", "화", "수", "목", "금", "토"];
-  var state = { memos: {}, manual: [], big: false, filter: "all", selDay: null };
+  var state = { memos: {}, manual: [], big: false, filter: "all", month: null, selDay: null };
 
   /* ---------------- 저장 ---------------- */
   function load() {
@@ -24,6 +31,7 @@
         state.manual = Array.isArray(s.manual) ? s.manual : [];
         state.big = !!s.big;
         state.filter = s.filter || "all";
+        state.month = s.month || null;
       }
     } catch (e) { /* 저장값이 깨졌으면 빈 상태로 시작 */ }
   }
@@ -31,7 +39,8 @@
     try {
       localStorage.setItem(KEY, JSON.stringify({
         version: 1, savedAt: new Date().toISOString(),
-        memos: state.memos, manual: state.manual, big: state.big, filter: state.filter
+        memos: state.memos, manual: state.manual, big: state.big,
+        filter: state.filter, month: state.month
       }));
       updateStorageLine();
     } catch (e) { toast("이 브라우저에는 저장할 수 없습니다"); }
@@ -46,7 +55,7 @@
   /* ---------------- 도우미 ---------------- */
   function pad(n) { return n < 10 ? "0" + n : "" + n; }
   function parseDate(s) { var p = s.split("-"); return new Date(+p[0], +p[1] - 1, +p[2]); }
-  // 기록이 모두 한국 시간(KST) 기준이라 D-day도 한국 날짜로 셉니다.
+  // 기록이 모두 가민 표시 날짜(현지) 기준이라 D-day도 한국 날짜로 셉니다.
   function todayKST() {
     try {
       var s = new Date().toLocaleDateString("en-CA", { timeZone: "Asia/Seoul" });
@@ -56,6 +65,7 @@
     return new Date(t.getFullYear(), t.getMonth(), t.getDate());
   }
   function todayStr() { var t = new Date(); return t.getFullYear() + "-" + pad(t.getMonth() + 1) + "-" + pad(t.getDate()); }
+  function prefixOf(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1); }
   function mmdd(s) { var p = s.split("-"); return (+p[1]) + "/" + (+p[2]); }
   function dowOf(s) { return DOW[parseDate(s).getDay()]; }
   function fmtDur(sec) {
@@ -96,7 +106,7 @@
         distanceM: m.distanceM || null, distanceKm: m.distanceKm || null,
         seconds: m.seconds || null, pace: m.pace || "",
         hrAvg: m.hrAvg || null, hrMax: m.hrMax || null, kcal: m.kcal || null,
-        extra: m.extra || "", manual: true
+        sets: m.sets || null, extra: m.extra || "", manual: true
       });
     });
     all.sort(function (a, b) {
@@ -105,17 +115,56 @@
     });
     return all;
   }
+  function emptyTotals() {
+    return {
+      swim: { n: 0, km: 0 }, run: { n: 0, km: 0 }, walk: { n: 0, km: 0 },
+      hike: { n: 0, km: 0 }, multi: { n: 0, km: 0 }, strength: 0, seconds: 0, kcal: 0
+    };
+  }
+  function addRecord(t, r) {
+    if (r.noTotal) { if (t[r.sport]) t[r.sport].n++; return; }
+    if (r.sport === "swim") { t.swim.n++; t.swim.km += (r.distanceM || 0) / 1000; }
+    else if (r.sport === "run" || r.sport === "walk" || r.sport === "hike" || r.sport === "multi") {
+      t[r.sport].n++; t[r.sport].km += (r.distanceKm || 0);
+    } else if (r.sport === "strength") { t.strength++; }
+    t.seconds += r.seconds || 0;
+    t.kcal += r.kcal || 0;
+  }
   function monthTotals(prefix) {
-    var t = { swim: { n: 0, km: 0 }, run: { n: 0, km: 0 }, strength: 0, seconds: 0, kcal: 0 };
+    var t = emptyTotals();
     allRecords().forEach(function (r) {
-      if (r.date.slice(0, 7) !== prefix) return;
-      if (r.sport === "swim") { t.swim.n++; t.swim.km += (r.distanceM || 0) / 1000; }
-      else if (r.sport === "run") { t.run.n++; t.run.km += (r.distanceKm || 0); }
-      else if (r.sport === "strength") { t.strength++; }
-      t.seconds += r.seconds || 0;
-      t.kcal += r.kcal || 0;
+      if (r.date.slice(0, 7) === prefix) addRecord(t, r);
     });
     return t;
+  }
+  function totalsBetween(fromStr, toStr) {
+    var t = emptyTotals();
+    allRecords().forEach(function (r) {
+      if (r.date >= fromStr && r.date <= toStr) addRecord(t, r);
+    });
+    return t;
+  }
+  function distOf(t) {
+    var s = 0;
+    DIST_SPORTS.forEach(function (k) { s += t[k].km; });
+    return s;
+  }
+  function monthKeys() {
+    var set = {};
+    D.monthly.forEach(function (m) { set[m.month] = true; });
+    allRecords().forEach(function (r) { set[r.date.slice(0, 7)] = true; });
+    return Object.keys(set).sort().reverse();
+  }
+  function monthLabel(key) {
+    var p = key.split("-");
+    return (+p[1]) + "월";
+  }
+  function curMonth() {
+    if (state.month) return state.month;
+    var keys = monthKeys();
+    var now = prefixOf(todayKST());
+    if (keys.indexOf(now) > -1) return now;
+    return keys[0];
   }
 
   /* ---------------- ① 요약 & D-day ---------------- */
@@ -172,42 +221,81 @@
     return "<div class=\"tcell\"><div class=\"k\">" + k + "</div><div class=\"v\">" + v +
       (unit ? "<small>" + unit + "</small>" : "") + "</div></div>";
   }
+  function typeBreakdown(t, opts) {
+    var parts = [];
+    if (t.swim.n) parts.push("수영 " + t.swim.n + "회 " + km(t.swim.km) + " km");
+    if (t.run.n) parts.push("러닝 " + t.run.n + "회 " + km(t.run.km) + " km");
+    if (t.walk.n) parts.push("걷기 " + t.walk.n + "회 " + km(t.walk.km) + " km");
+    if (t.hike.n) parts.push("하이킹 " + t.hike.n + "회 " + km(t.hike.km) + " km");
+    if (t.strength) parts.push("근력 " + t.strength + "회");
+    if (opts && opts.showMulti && t.multi.n) parts.push("멀티스포츠 " + t.multi.n + "회");
+    return parts.join(" · ");
+  }
   function renderMonthTotal() {
-    var t = monthTotals("2026-11");
+    var prefix = prefixOf(todayKST());
+    if (!monthTotals(prefix).swim.n && !monthTotals(prefix).run.n && !monthTotals(prefix).walk.n &&
+        !monthTotals(prefix).hike.n && !monthTotals(prefix).strength) {
+      prefix = monthKeys()[0];
+    }
+    var t = monthTotals(prefix);
     var el = document.getElementById("monthTotal");
     if (!el) return;
+    var p = prefix.split("-");
+    var lastDay = lastRecordDay(prefix);
     el.innerHTML =
-      "<div class=\"totalhead\"><span>이번 달 합계</span><em>11월 · 1~18일</em></div>" +
+      "<div class=\"totalhead\"><span>이번 달 합계</span><em>" + (+p[1]) + "월 · 1~" + lastDay + "일</em></div>" +
       "<div class=\"tgrid\">" +
-        tcell("총 거리", km(t.swim.km + t.run.km), "km") +
+        tcell("총 거리", km(distOf(t)), "km") +
         tcell("운동 시간", fmtDur(t.seconds), "") +
         tcell("칼로리", int(t.kcal), "kcal") +
       "</div>" +
-      "<p class=\"tn\">수영 " + t.swim.n + "회 " + km(t.swim.km) + " km · 러닝 " + t.run.n + "회 " +
-        km(t.run.km) + " km · 근력 " + t.strength + "회</p>";
+      "<p class=\"tn\">" + typeBreakdown(t, { showMulti: true }) + "</p>";
+  }
+  function lastRecordDay(prefix) {
+    var d = 1;
+    allRecords().forEach(function (r) { if (r.date.slice(0, 7) === prefix) d = Math.max(d, +r.date.slice(8, 10)); });
+    var last = new Date(+prefix.split("-")[0], +prefix.split("-")[1], 0).getDate();
+    return Math.min(d, last);
   }
 
-  /* 이번 달 / 지난 주 / 최근 30일 — 작은 여닫이 */
+  /* 이번 달 / 지난 주 / 최근 30일 — 작은 여닫이. 숫자는 기록에서 그때그때 계산합니다. */
+  function windowRanges() {
+    var today = todayKST();
+    var dow = today.getDay();                     // 0=일
+    var mondayThis = new Date(today.getFullYear(), today.getMonth(), today.getDate() - ((dow + 6) % 7));
+    var mondayLast = new Date(mondayThis.getFullYear(), mondayThis.getMonth(), mondayThis.getDate() - 7);
+    var sundayLast = new Date(mondayThis.getFullYear(), mondayThis.getMonth(), mondayThis.getDate() - 1);
+    var d30 = new Date(today.getFullYear(), today.getMonth(), today.getDate() - 29);
+    function s(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+    return [
+      { label: "이번 달", sub: (today.getMonth() + 1) + "/1 ~ " + (today.getMonth() + 1) + "/" + today.getDate(), from: prefixOf(today) + "-01", to: s(today), note: "가민에 올라온 날짜 그대로" },
+      { label: "지난 주", sub: (mondayLast.getMonth() + 1) + "/" + mondayLast.getDate() + " ~ " + (sundayLast.getMonth() + 1) + "/" + sundayLast.getDate(), from: s(mondayLast), to: s(sundayLast), note: "월~일 기준" },
+      { label: "최근 30일", sub: (d30.getMonth() + 1) + "/" + d30.getDate() + " ~ " + (today.getMonth() + 1) + "/" + today.getDate(), from: s(d30), to: s(today), note: "오늘 포함 30일" }
+    ];
+  }
   function renderWindows() {
-    var nov = monthTotals("2026-11");
     var box = document.getElementById("windowAcc");
     if (!box) return;
-    box.innerHTML = D.windows.map(function (w) {
-      var isMonth = w.label === "이번 달";
-      var swim = isMonth ? nov.swim : w.swim;
-      var run = isMonth ? nov.run : w.run;
-      var st = isMonth ? nov.strength : w.strength;
+    box.innerHTML = windowRanges().map(function (w) {
+      var t = totalsBetween(w.from, w.to);
+      var rows = [
+        ["🏊 수영", t.swim.n + "회 · " + km(t.swim.km) + " km"],
+        ["🏃 러닝", t.run.n + "회 · " + km(t.run.km) + " km"],
+        ["🚶 걷기", t.walk.n + "회 · " + km(t.walk.km) + " km"],
+        ["🥾 하이킹", t.hike.n + "회 · " + km(t.hike.km) + " km"],
+        ["🏋️ 근력", t.strength + "회"]
+      ];
       return "<div class=\"acc-item\">" +
         "<button class=\"acc-btn\" type=\"button\" aria-expanded=\"false\">" +
           "<span class=\"ak\">" + esc(w.label) + "</span>" +
-          "<span class=\"as\">" + esc(w.sub || "") + "</span>" +
+          "<span class=\"as\">" + esc(w.sub) + "</span>" +
           "<span class=\"chev\"></span>" +
         "</button>" +
         "<div class=\"acc-body\">" +
-          "<div class=\"arow\"><span class=\"an\">🏊 수영</span><span class=\"av\">" + swim.n + "회 · " + km(swim.km) + " km</span></div>" +
-          "<div class=\"arow\"><span class=\"an\">🏃 러닝</span><span class=\"av\">" + run.n + "회 · " + km(run.km) + " km</span></div>" +
-          "<div class=\"arow\"><span class=\"an\">🏋️ 근력</span><span class=\"av\">" + st + "회</span></div>" +
-          (w.note ? "<p class=\"anote\">" + esc(w.note) + "</p>" : "") +
+          rows.map(function (r) {
+            return "<div class=\"arow\"><span class=\"an\">" + r[0] + "</span><span class=\"av\">" + esc(r[1]) + "</span></div>";
+          }).join("") +
+          "<p class=\"anote\">" + esc(w.note || "") + "</p>" +
         "</div>" +
       "</div>";
     }).join("");
@@ -220,11 +308,19 @@
     });
   }
 
-  /* 11월 달력 — 운동한 날은 종목 색 점으로 표시 */
+  /* 달력 — 운동한 날은 종목 색 점으로 표시 */
   function renderCalendars() {
     var recs = allRecords();
-    renderCal(document.getElementById("calSummary"), "2026-11", recs, { interactive: false });
-    renderCal(document.getElementById("calRecords"), "2026-11", recs, { interactive: true });
+    var nowPrefix = prefixOf(todayKST());
+    var sumPrefix = monthTotals(nowPrefix).swim.n || monthTotals(nowPrefix).run.n || monthTotals(nowPrefix).walk.n ||
+      monthTotals(nowPrefix).strength ? nowPrefix : monthKeys()[0];
+    var t = document.getElementById("calSummaryTitle");
+    if (t) t.textContent = sumPrefix.split("-")[0] + "년 " + (+sumPrefix.split("-")[1]) + "월";
+    renderCal(document.getElementById("calSummary"), sumPrefix, recs, { interactive: false });
+    var m = curMonth();
+    var rt = document.getElementById("calRecordsTitle");
+    if (rt) rt.textContent = m.split("-")[0] + "년 " + (+m.split("-")[1]) + "월";
+    renderCal(document.getElementById("calRecords"), m, recs, { interactive: true });
   }
 
   function renderCal(el, prefix, recs, opts) {
@@ -239,9 +335,8 @@
       var o = byDate[r.date] || (byDate[r.date] = {});
       o[r.sport] = (o[r.sport] || 0) + 1;
     });
-    var known = {};
-    D.days.forEach(function (d) { known[d.date] = true; });
     var today = todayKST();
+    var dotsOrder = ["swim", "run", "walk", "hike", "multi", "strength"];
 
     var html = DOW.map(function (w, i) {
       return "<div class=\"cw" + (i === 0 ? " sun" : "") + "\">" + w + "</div>";
@@ -258,11 +353,11 @@
         (isToday ? " is-today" : "") + (state.selDay === ds ? " is-sel" : "");
       var dots = "<span class=\"dots\"></span>";
       if (sp) {
-        dots = "<span class=\"dots\">" + ["swim", "run", "strength"].filter(function (k) { return sp[k]; })
+        dots = "<span class=\"dots\">" + dotsOrder.filter(function (k) { return sp[k]; })
           .map(function (k) { return "<i class=\"" + k + "\"></i>"; }).join("") + "</span>";
       }
       var inner = "<span class=\"dn\">" + d + "</span>" + dots;
-      var clickable = opts.interactive && !isFuture && !!(sp || known[ds]);
+      var clickable = opts.interactive && !isFuture && !!sp;
       if (clickable) {
         html += "<button class=\"cday " + cls + "\" type=\"button\" data-date=\"" + ds +
           "\" aria-pressed=\"" + (state.selDay === ds ? "true" : "false") +
@@ -373,6 +468,7 @@
   }
 
   function drawBarChart(el, items, opts) {
+    if (!el) return;
     var W = Math.max(260, el.clientWidth || 340);
     var H = W < 420 ? 172 : (W < 760 ? 210 : 250);
     var m = { l: 34, r: 14, t: 22, b: 28 };
@@ -403,7 +499,7 @@
       var color = it.value <= 0 ? "#E3EAE7" : (it.color || opts.color);
       svg.push("<rect class=\"bar\" data-i=\"" + i + "\" x=\"" + (cx - barW / 2).toFixed(1) + "\" y=\"" + y.toFixed(1) +
         "\" width=\"" + barW.toFixed(1) + "\" height=\"" + h.toFixed(1) + "\" rx=\"4\" fill=\"" + color + "\"" +
-        (it.hl ? " stroke=\"#0F352E\" stroke-width=\"1.5\"" : "") + "/>");
+        (it.hl ? " stroke=\"#0F352E\" stroke-width=\"1.5\"" : "") + "\"/>");
       if (it.value > 0) {
         var lbl = opts.decimals ? (Math.round(it.value * 10) / 10) : Math.round(it.value);
         var lblText = String(lbl);
@@ -461,12 +557,10 @@
 
   function renderCharts() {
     var rows = D.monthly.map(function (m) { return m; });
-    var nov = monthTotals("2026-11");
-    var last = rows[rows.length - 1];
-    last.swim = { n: nov.swim.n, km: nov.swim.km };
-    last.run = { n: nov.run.n, km: nov.run.km };
-    last.strength = nov.strength;
-
+    var avgOf = function (items) {
+      var vals = items.map(function (i) { return i.value; }).filter(function (v) { return v > 0; });
+      return vals.length ? vals.reduce(function (a, b) { return a + b; }, 0) / vals.length : null;
+    };
     var swimItems = rows.map(function (m) {
       return {
         label: m.label, value: m.swim.km,
@@ -481,33 +575,39 @@
           (m.run.n ? "<br>1회당 평균 " + km(m.run.km / m.run.n) + " km" : "")
       };
     });
+    var walkItems = rows.map(function (m) {
+      return {
+        label: m.label, value: m.walk.km + m.hike.km,
+        tip: "<b>" + m.label + "</b><br>걷기 " + m.walk.n + "회 · " + km(m.walk.km) + " km<br>하이킹 " + m.hike.n +
+          "회 · " + km(m.hike.km) + " km"
+      };
+    });
     var stItems = rows.map(function (m) {
       return { label: m.label, value: m.strength, color: m.strength ? "#B4503A" : "#E3EAE7", tip: "<b>" + m.label + "</b><br>근력 " + m.strength + "회" };
     });
 
-    function avgOf(items) {
-      var vals = items.map(function (i) { return i.value; }).filter(function (v) { return v > 0; });
-      return vals.length ? vals.reduce(function (a, b) { return a + b; }, 0) / vals.length : null;
-    }
-
-    var avgSwim = avgOf(swimItems), avgRun = avgOf(runItems), avgSt = avgOf(stItems);
+    var avgSwim = avgOf(swimItems), avgRun = avgOf(runItems), avgWalk = avgOf(walkItems), avgSt = avgOf(stItems);
     drawBarChart(document.getElementById("chartSwim"), swimItems, { color: "#1D5FA8", decimals: true, avg: avgSwim });
     drawBarChart(document.getElementById("chartRun"), runItems, { color: "#E9A23B", decimals: true, avg: avgRun });
+    drawBarChart(document.getElementById("chartWalk"), walkItems, { color: "#2E8B74", decimals: true, avg: avgWalk });
     drawBarChart(document.getElementById("chartStrength"), stItems, { color: "#B4503A", decimals: false, avg: avgSt });
 
-    setUnit("chartSwim", "km · 회 · 평균 " + km(avgSwim) + " km");
-    setUnit("chartRun", "km · 회 · 평균 " + km(avgRun) + " km");
-    setUnit("chartStrength", "회 · 평균 " + Math.round(avgSt) + "회");
+    setUnit("chartSwim", "km · 회 · 평균 " + (avgSwim == null ? "—" : km(avgSwim)) + " km");
+    setUnit("chartRun", "km · 회 · 평균 " + (avgRun == null ? "—" : km(avgRun)) + " km");
+    setUnit("chartWalk", "km · 회 · 평균 " + (avgWalk == null ? "—" : km(avgWalk)) + " km");
+    setUnit("chartStrength", "회 · 평균 " + (avgSt == null ? "—" : Math.round(avgSt)) + "회");
 
     // 월별 표
     var tbl = document.getElementById("monthlyTable");
-    var head = "<thead><tr><th>월</th><th>수영</th><th>러닝</th><th>근력</th><th>합계 거리</th></tr></thead>";
+    var head = "<thead><tr><th>월</th><th>수영</th><th>러닝</th><th>걷기·하이킹</th><th>근력</th><th>합계 거리</th></tr></thead>";
     var body = rows.map(function (m) {
+      var wk = m.walk.km + m.hike.km;
       return "<tr><td><b>" + m.label + "</b></td>" +
         "<td class=\"num\">" + m.swim.n + "회 · " + km(m.swim.km) + " km</td>" +
         "<td class=\"num\">" + (m.run.n ? m.run.n + "회 · " + km(m.run.km) + " km" : "—") + "</td>" +
+        "<td class=\"num\">" + (m.walk.n || m.hike.n ? (m.walk.n + m.hike.n) + "회 · " + km(wk) + " km" : "—") + "</td>" +
         "<td class=\"num\">" + (m.strength ? m.strength + "회" : "—") + "</td>" +
-        "<td class=\"num\"><b>" + km(m.swim.km + m.run.km) + " km</b></td></tr>";
+        "<td class=\"num\"><b>" + km(m.swim.km + m.run.km + wk) + " km</b></td></tr>";
     }).join("");
     tbl.innerHTML = head + "<tbody>" + body + "</tbody>";
   }
@@ -530,12 +630,34 @@
   }
 
   /* ---------------- ④ 기록 목록 ---------------- */
+  function renderMonthChips() {
+    var box = document.getElementById("monthChips");
+    if (!box) return;
+    var cur = curMonth();
+    box.innerHTML = monthKeys().map(function (k) {
+      var t = monthTotals(k);
+      var n = t.swim.n + t.run.n + t.walk.n + t.hike.n + t.multi.n + t.strength;
+      return "<button class=\"mchip" + (k === cur ? " is-active" : "") + "\" type=\"button\" data-month=\"" + k +
+        "\" aria-pressed=\"" + (k === cur ? "true" : "false") + "\"><b>" + monthLabel(k) + "</b><small>" + n + "건</small></button>";
+    }).join("");
+    Array.prototype.forEach.call(box.querySelectorAll(".mchip"), function (b) {
+      b.addEventListener("click", function () {
+        state.month = b.getAttribute("data-month");
+        state.selDay = null;
+        save();
+        renderRecordsSection();
+      });
+    });
+  }
+
   function renderMonthSum() {
-    var t = monthTotals("2026-11");
+    var m = curMonth();
+    var t = monthTotals(m);
     var parts = [
-      ["합계", km(t.swim.km + t.run.km) + " km", true],
+      ["합계", km(distOf(t)) + " km", true],
       ["수영", km(t.swim.km) + " km", false],
       ["러닝", km(t.run.km) + " km", false],
+      ["걷기", km(t.walk.km + t.hike.km) + " km", false],
       ["근력", t.strength + "회", false],
       ["시간", fmtDur(t.seconds), false],
       ["칼로리", int(t.kcal) + " kcal", false]
@@ -549,15 +671,27 @@
     var s = SPORTS[r.sport] || { name: r.sport, icon: "•" };
     var distCell = "";
     if (r.sport === "swim" && r.distanceM) distCell = numCell("거리", int(r.distanceM), "m");
-    else if (r.sport === "run" && r.distanceKm) distCell = numCell("거리", km(r.distanceKm), "km");
+    else if (KM_SPORTS[r.sport] && r.distanceKm) distCell = numCell("거리", km(r.distanceKm), "km");
     else if (r.sport === "strength") distCell = numCell("세트 수", r.sets ? r.sets : "—", "");
+
+    var paceCell = "";
+    if (r.pace) {
+      paceCell = numCell("평균 페이스", r.pace.replace(" /100m", "").replace(" /km", ""), r.pace.indexOf("/100m") > -1 ? "/100m" : "/km");
+    } else if (r.sport === "multi" && r.multiSpeed) {
+      paceCell = numCell("평균 속도", r.multiSpeed, "km/h");
+    }
 
     var cells = distCell +
       numCell("시간", fmtDur(r.seconds), "") +
-      (r.pace ? numCell("평균 페이스", r.pace.replace(" /100m", "").replace(" /km", ""), r.pace.indexOf("/100m") > -1 ? "/100m" : "/km") : "") +
-      (r.hrAvg ? numCell("심박 평균/최대", r.hrAvg + (r.hrMax ? "/" + r.hrMax : ""), "bpm") : "");
+      paceCell +
+      (r.hrAvg ? numCell("심박 평균/최대", r.hrAvg + (r.hrMax ? "/" + r.hrMax : ""), "bpm")
+        : (r.hrMax ? numCell("최대 심박", r.hrMax, "bpm") : ""));
 
     var memo = state.memos[r.id] || "";
+    var ph = r.sport === "swim" ? "예: 물 22도, 팔 힘 좋았음"
+      : r.sport === "run" ? "예: 무릎 괜찮음, 마지막 1km 힘들었음"
+      : r.sport === "walk" || r.sport === "hike" ? "예: 날씨 좋음, 다리 가벼움"
+      : "예: 하체 위주, 다음날 뻐근함";
     return "<article class=\"rec" + (r.manual ? " manual" : "") + "\" data-id=\"" + esc(r.id) +
       "\" data-date=\"" + esc(r.date) + "\" data-sport=\"" + esc(r.sport) + "\">" +
       "<div class=\"rec-head\">" +
@@ -577,7 +711,7 @@
         "<label class=\"lbl\" for=\"memo-" + esc(r.id) + "\">컨디션 메모" +
           "<span class=\"note-saved\" id=\"saved-" + esc(r.id) + "\">저장됨</span></label>" +
         "<textarea id=\"memo-" + esc(r.id) + "\" data-memo=\"" + esc(r.id) + "\" rows=\"2\" " +
-          "placeholder=\"" + (r.sport === "swim" ? "예: 물 22도, 팔 힘 좋았음" : r.sport === "run" ? "예: 무릎 괜찮음, 마지막 1km 힘들었음" : "예: 하체 위주, 다음날 뻐근함") + "\">" + esc(memo) + "</textarea>" +
+          "placeholder=\"" + ph + "\">" + esc(memo) + "</textarea>" +
         (r.manual ? "<button class=\"del\" type=\"button\" data-del=\"" + esc(r.id) + "\">이 기록 삭제</button>" : "") +
       "</div>" +
     "</article>";
@@ -587,19 +721,37 @@
   }
 
   function renderRecords() {
-    var all = allRecords();
-    var counts = { all: all.length, swim: 0, run: 0, strength: 0 };
-    all.forEach(function (r) { if (counts[r.sport] != null) counts[r.sport]++; });
+    var m = curMonth();
+    var inMonth = allRecords().filter(function (r) { return r.date.slice(0, 7) === m; });
+    var counts = { all: inMonth.length, swim: 0, run: 0, walk: 0, hike: 0, strength: 0, multi: 0 };
+    inMonth.forEach(function (r) { if (counts[r.sport] != null) counts[r.sport]++; });
     document.getElementById("cAll").textContent = counts.all;
     document.getElementById("cSwim").textContent = counts.swim;
     document.getElementById("cRun").textContent = counts.run;
+    document.getElementById("cWalk").textContent = counts.walk;
+    document.getElementById("cHike").textContent = counts.hike;
     document.getElementById("cStrength").textContent = counts.strength;
+    document.getElementById("cMulti").textContent = counts.multi;
 
-    var list = state.filter === "all" ? all : all.filter(function (r) { return r.sport === state.filter; });
+    var title = document.getElementById("recTitle");
+    if (title) title.textContent = monthLabel(m) + " 날짜별 기록";
+
+    var list = state.filter === "all" ? inMonth : inMonth.filter(function (r) { return r.sport === state.filter; });
     var box = document.getElementById("recordList");
-    box.innerHTML = list.length ? list.map(recCard).join("") : "<div class=\"card empty\">이 종목 기록이 아직 없습니다.</div>";
+    if (!list.length) {
+      var others = monthKeys().filter(function (k) {
+        return allRecords().some(function (r) { return r.date.slice(0, 7) === k && r.sport === state.filter; });
+      }).map(monthLabel);
+      var msg = state.filter === "all"
+        ? monthLabel(m) + "에는 가민에 올라온 기록이 없습니다."
+        : monthLabel(m) + "에는 " + (SPORTS[state.filter] ? SPORTS[state.filter].name : "") + " 기록이 없습니다." +
+          (others.length ? " 기록이 있는 달: " + others.join(" · ") + " — 위에서 달을 골라 보세요." : "");
+      box.innerHTML = "<div class=\"card empty\">" + esc(msg) + "</div>";
+    } else {
+      box.innerHTML = list.map(recCard).join("");
+    }
     bindMemos(box);
-    renderEmptyDays(all);
+    renderEmptyDays(inMonth, m);
   }
 
   var saveTimers = {};
@@ -634,17 +786,32 @@
     });
   }
 
-  function renderEmptyDays(all) {
+  function renderEmptyDays(inMonth, m) {
     var box = document.getElementById("emptyDays");
     var has = {};
-    all.forEach(function (r) { has[r.date] = true; });
-    var empty = D.days.filter(function (d) { return !has[d.date]; });
-    if (!empty.length) { box.innerHTML = "<div class=\"card empty\">11/1~11/18 모든 날에 기록이 있습니다.</div>"; return; }
-    box.innerHTML = empty.map(function (d) {
-      var id = "day-" + d.date;
-      return "<article class=\"rec\" data-date=\"" + esc(d.date) + "\" data-sport=\"-\">" +
+    inMonth.forEach(function (r) { has[r.date] = true; });
+    var p = m.split("-");
+    var y = +p[0], mo = +p[1];
+    var last = new Date(y, mo, 0).getDate();
+    var today = todayKST();
+    if (m === prefixOf(today)) last = Math.min(last, today.getDate());
+    var empty = [];
+    for (var d = 1; d <= last; d++) {
+      var ds = m + "-" + pad(d);
+      if (!has[ds]) empty.push(ds);
+    }
+    var title = document.getElementById("emptyTitle");
+    if (!empty.length) {
+      if (title) title.textContent = monthLabel(m) + " 기록이 없는 날";
+      box.innerHTML = "<div class=\"card empty\">" + monthLabel(m) + " 1~" + last + "일 모든 날에 기록이 있습니다.</div>";
+      return;
+    }
+    if (title) title.textContent = monthLabel(m) + " 기록이 없는 날 (" + empty.length + "일)";
+    box.innerHTML = empty.map(function (ds) {
+      var id = "day-" + ds;
+      return "<article class=\"rec\" data-date=\"" + esc(ds) + "\" data-sport=\"-\">" +
         "<div class=\"rec-head\">" +
-          "<div class=\"rec-date\"><div class=\"d\">" + esc(mmdd(d.date)) + "</div><div class=\"w\">" + d.dow + "</div></div>" +
+          "<div class=\"rec-date\"><div class=\"d\">" + esc(mmdd(ds)) + "</div><div class=\"w\">" + dowOf(ds) + "</div></div>" +
           "<div style=\"flex:1;min-width:0\"><div class=\"rec-sub\" style=\"margin-top:.35rem\">운동 기록 없음 · 그날 몸 상태나 이유를 한 줄</div></div>" +
         "</div>" +
         "<div class=\"rec-body\">" +
@@ -652,6 +819,13 @@
         "</div></article>";
     }).join("");
     bindMemos(box);
+  }
+
+  function renderRecordsSection() {
+    renderMonthChips();
+    renderCalendars();
+    renderMonthSum();
+    renderRecords();
   }
 
   /* ---------------- 필터 ---------------- */
@@ -680,8 +854,9 @@
     var hint = document.getElementById("fDistHint");
     document.getElementById("fDate").value = todayStr();
     function syncHint() {
-      hint.textContent = fSport.value === "swim" ? "(m)" : fSport.value === "run" ? "(km)" : "(해당 없음)";
-      document.getElementById("fDist").disabled = fSport.value === "strength";
+      var v = fSport.value;
+      hint.textContent = v === "swim" ? "(m)" : v === "strength" ? "(해당 없음)" : "(km)";
+      document.getElementById("fDist").disabled = v === "strength";
     }
     fSport.addEventListener("change", syncHint);
     syncHint();
@@ -702,16 +877,20 @@
         kcal: parseInt(document.getElementById("fKcal").value, 10) || null
       };
       if (sport === "swim" && dist > 0) rec.distanceM = dist;
-      if (sport === "run" && dist > 0) rec.distanceKm = dist;
-      if (rec.seconds && ((sport === "swim" && rec.distanceM) || (sport === "run" && rec.distanceKm))) {
-        var meters = sport === "swim" ? rec.distanceM : rec.distanceKm * 1000;
-        var per = rec.seconds / meters * 100;
-        if (sport === "swim") rec.pace = Math.floor(per / 60) + ":" + pad(Math.round(per % 60)) + " /100m";
-        else rec.pace = fmtDur(rec.seconds / (meters / 1000)) + " /km";
+      if (KM_SPORTS[sport] && dist > 0) rec.distanceKm = dist;
+      var meters = sport === "swim" ? rec.distanceM : (rec.distanceKm || 0) * 1000;
+      if (rec.seconds && meters) {
+        if (sport === "swim") {
+          var per = rec.seconds / meters * 100;
+          rec.pace = Math.floor(per / 60) + ":" + pad(Math.round(per % 60)) + " /100m";
+        } else {
+          rec.pace = fmtDur(rec.seconds / (meters / 1000)) + " /km";
+        }
       }
       var note = document.getElementById("fNote").value;
       state.manual.push(rec);
       if (note && note.trim()) state.memos[rec.id] = note;
+      state.month = date.slice(0, 7);
       save();
       form.reset();
       document.getElementById("fDate").value = todayStr();
@@ -726,7 +905,7 @@
     var data = {
       app: "workout-log", version: 1, owner: D.meta.owner,
       savedAt: new Date().toISOString(),
-      memos: state.memos, manual: state.manual, big: state.big, filter: state.filter
+      memos: state.memos, manual: state.manual, big: state.big, filter: state.filter, month: state.month
     };
     var blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
     var a = document.createElement("a");
@@ -806,14 +985,12 @@
   function renderAll() {
     renderHeader();
     renderRaces();
-    renderCalendars();
     renderMonthTotal();
     renderWindows();
     renderCharts();
     renderPR();
     renderPaceBars();
-    renderMonthSum();
-    renderRecords();
+    renderRecordsSection();
     updateStorageLine();
   }
 
