@@ -1,4 +1,4 @@
-/* 김상진님의 평생 여행 로그 — 앱 로직
+/* 진의 스윔트립 — 앱 로직
    저장: 글·체크·코드 = localStorage, 사진 = IndexedDB(실패 시 localStorage) */
 (function () {
   "use strict";

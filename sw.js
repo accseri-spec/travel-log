@@ -1,12 +1,12 @@
-/* 여행 로그 오프라인 지원 (Service Worker)
-   - 앱 화면(여행 로그 + 운동 로그)의 정적 파일을 설치할 때 미리 받아 둡니다.
+/* 진의 스윔트립 오프라인 지원 (Service Worker)
+   - 앱 화면(스윔트립 + 운동 로그)의 정적 파일을 설치할 때 미리 받아 둡니다.
    - 평소에는 네트워크 우선(Network-First): 온라인일 때 항상 최신 data.js 를 받아 캐시를 갱신합니다.
    - 오프라인·비행기모드에서는 캐시에 든 마지막 버전을 바로 돌려줍니다.
    - 새 버전을 배포할 때 CACHE_NAME 만 올리면 이전 캐시는 지워집니다.
    - ?v=14 처럼 query string 이 붙은 요청도 ignoreSearch 로 같은 파일에 매칭합니다.
    - 체크리스트·메모·예약코드(#codes=)는 브라우저 localStorage 에 있으므로 오프라인에서도 그대로 동작합니다. */
 
-const CACHE_NAME = 'travel-log-v1-2026-11-19c';
+const CACHE_NAME = 'travel-log-v1-2026-11-19d';
 const OFFLINE_URL = './index.html';
 
 const PRECACHE_URLS = [

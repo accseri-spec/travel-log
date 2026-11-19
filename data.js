@@ -11,7 +11,7 @@
    data.js 는 공개 파일이므로 날씨 외의 개인정보는 넣지 않습니다. */
 window.TRIP = {
   name: "김상진",
-  title: "김상진님의 평생 여행 로그",
+  title: "진의 스윔트립",
   updated: "2026-11-19",
 
   countries: [
