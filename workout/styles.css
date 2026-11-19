@@ -258,7 +258,8 @@ button.cday:active{transform:scale(.95)}
 
 /* ---------- 필터 (달력 아래 4버튼) ---------- */
 .filters{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem;margin:.7rem 0 .1rem}
-@media(min-width:26rem){.filters{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(min-width:22rem){.filters{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(min-width:30rem){.filters{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(min-width:44rem){.filters{grid-template-columns:repeat(7,minmax(0,1fr))}}
 
 /* 달 선택 (4월 ~ 11월) */

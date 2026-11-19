@@ -6,7 +6,7 @@
    - ?v=14 처럼 query string 이 붙은 요청도 ignoreSearch 로 같은 파일에 매칭합니다.
    - 체크리스트·메모·예약코드(#codes=)는 브라우저 localStorage 에 있으므로 오프라인에서도 그대로 동작합니다. */
 
-const CACHE_NAME = 'travel-log-v1-2026-11-20c';
+const CACHE_NAME = 'travel-log-v1-2026-11-20d';
 const OFFLINE_URL = './index.html';
 
 const PRECACHE_URLS = [
