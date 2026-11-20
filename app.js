@@ -760,24 +760,50 @@
   }
 
   /* ---------------- 사진 칸 ---------------- */
+  function readAsDataURL(file) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader();
+      fr.onload = function () { res(String(fr.result || "")); };
+      fr.onerror = function () { rej(new Error("file")); };
+      fr.readAsDataURL(file);
+    });
+  }
+
+  /* 사진을 긴 변 maxSide 로 줄여 JPEG data URL 로 돌려줍니다.
+     - blob: URL 을 못 읽는 Android WebView·인앱 브라우저가 있어, 실패하면 FileReader 로 한 번 더 시도합니다. */
   function resizeImage(file, maxSide, quality) {
     maxSide = maxSide || 1400; quality = quality || 0.82;
-    return new Promise(function (res, rej) {
-      var url = URL.createObjectURL(file);
-      var img = new Image();
-      img.onload = function () {
-        var w = img.naturalWidth, h = img.naturalHeight;
-        var sc = Math.min(1, maxSide / Math.max(w, h));
-        w = Math.max(1, Math.round(w * sc)); h = Math.max(1, Math.round(h * sc));
-        var cv = document.createElement("canvas");
-        cv.width = w; cv.height = h;
-        cv.getContext("2d").drawImage(img, 0, 0, w, h);
-        URL.revokeObjectURL(url);
-        try { res(cv.toDataURL("image/jpeg", quality)); } catch (e) { rej(e); }
-      };
-      img.onerror = function () { URL.revokeObjectURL(url); rej(new Error("image")); };
-      img.src = url;
-    });
+    function shrink(src) {
+      return new Promise(function (res, rej) {
+        var img = new Image();
+        img.onload = function () {
+          try {
+            var w = img.naturalWidth, h = img.naturalHeight;
+            var sc = Math.min(1, maxSide / Math.max(w, h));
+            w = Math.max(1, Math.round(w * sc)); h = Math.max(1, Math.round(h * sc));
+            var cv = document.createElement("canvas");
+            cv.width = w; cv.height = h;
+            cv.getContext("2d").drawImage(img, 0, 0, w, h);
+            res(cv.toDataURL("image/jpeg", quality));
+          } catch (e) { rej(e); }
+        };
+        img.onerror = function () { rej(new Error("image")); };
+        img.src = src;
+      });
+    }
+    var blobUrl = null;
+    try { blobUrl = URL.createObjectURL(file); } catch (e) { blobUrl = null; }
+    function release() {
+      if (!blobUrl) return;
+      try { URL.revokeObjectURL(blobUrl); } catch (e) { /* 무시 */ }
+      blobUrl = null;
+    }
+    if (!blobUrl) return readAsDataURL(file).then(shrink);
+    return shrink(blobUrl).then(function (dataUrl) { release(); return dataUrl; },
+      function () {
+        release();
+        return readAsDataURL(file).then(shrink);
+      });
   }
 
   /* opts: {list, max, label, repGet, repSet, after} */
@@ -785,12 +811,10 @@
     var box = document.createElement("div");
     var list = opts.list, max = opts.max, repGet = opts.repGet || function () { return null; };
     var repSet = opts.repSet || null;
-    var uid = "ph" + Math.random().toString(36).slice(2, 8);
     box.innerHTML = '<div class="lbl" style="display:flex;justify-content:space-between;align-items:center"><span>' +
       esc(opts.label || "사진") + ' (<span class="photo-count">' + list.filter(Boolean).length + "/" + max + "</span>)</span></div>" +
-      '<div class="photos"></div><input type="file" accept="image/*" multiple hidden>';
+      '<div class="photos"></div>';
     var grid = box.querySelector(".photos");
-    var input = box.querySelector("input[type=file]");
     var rep = repGet();
 
     list.forEach(function (pid, idx) {
@@ -837,21 +861,26 @@
       grid.appendChild(cell);
     });
 
+    /* 사진 고르기: <label class="ph-add"> 안에 파일 input 을 겹쳐 둡니다.
+       hidden(display:none) input 에 programmatic click() 을 보내는 방식은 Android WebView·인앱 브라우저에서
+       막히는 경우가 많아, 탭이 곧바로 input 으로 들어가게 했습니다. */
+    var pick = null;
     if (list.filter(Boolean).length < max) {
-      var add = document.createElement("button");
-      add.type = "button";
+      var add = document.createElement("label");
       add.className = "ph-add";
-      add.textContent = "＋ 사진";
-      add.addEventListener("click", function () { input.click(); });
+      add.innerHTML = '<span class="ph-add-txt">＋ 사진</span>' +
+        '<input class="ph-file" type="file" accept="image/*" multiple aria-label="사진 고르기">';
+      pick = add.querySelector("input[type=file]");
       grid.appendChild(add);
     }
 
-    input.addEventListener("change", function () {
-      var files = Array.prototype.slice.call(input.files || []).slice(0, max - list.filter(Boolean).length);
-      input.value = "";
-      if (!files.length) return;
+    function clearPick(el) { try { el.value = ""; } catch (e) { /* 무시 */ } }
+
+    function addFiles(el) {
+      var files = Array.prototype.slice.call(el.files || []).slice(0, max - list.filter(Boolean).length);
+      if (!files.length) { clearPick(el); return; }
       toast("사진을 준비하는 중…");
-      var chain = Promise.resolve();
+      var added = 0, failed = 0, chain = Promise.resolve();
       files.forEach(function (f) {
         chain = chain.then(function () {
           return resizeImage(f).then(function (url) {
@@ -859,17 +888,21 @@
             return PhotoStore.put(pid, url).then(function () {
               photoCache[pid] = url;
               list.push(pid);
+              added += 1;
               if (repSet && !repGet()) repSet(pid);
             });
-          });
+          }).catch(function () { failed += 1; });   // 한 장이 실패해도 나머지는 계속 붙입니다.
         });
       });
       chain.then(function () {
-        save(true);
-        if (opts.after) opts.after();
-        toast("사진을 붙였어요");
-      }).catch(function () { toast("사진을 넣지 못했어요 — 다른 사진으로 해보세요"); });
-    });
+        if (added) { save(true); if (opts.after) opts.after(); }
+        if (failed && added) toast(added + "장을 붙이고 " + failed + "장은 넣지 못했어요 — 다른 사진으로 해보세요");
+        else if (failed) toast("사진을 넣지 못했어요 — 다른 사진으로 해보세요");
+        else toast("사진을 붙였어요");
+      }).then(function () { clearPick(el); });   // 같은 사진을 다시 골라도 change 가 오도록 마지막에 비웁니다.
+    }
+
+    if (pick) pick.addEventListener("change", function () { addFiles(pick); });
     return box;
   }
 

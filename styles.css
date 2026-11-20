@@ -194,7 +194,12 @@ textarea:focus,input:focus,select:focus{outline:2px solid rgba(47,125,107,.35);o
 .ph .rep-tag{position:absolute;left:.15rem;top:.15rem;background:var(--amber);color:#231400;font-size:.6rem;font-weight:800;padding:.05rem .3rem;border-radius:999px}
 .ph button{position:absolute;right:.15rem;top:.15rem;width:1.35rem;height:1.35rem;border-radius:999px;border:0;background:rgba(15,53,46,.72);color:#fff;font-size:.8rem;line-height:1;cursor:pointer;padding:0}
 .ph .repbtn{position:absolute;left:.15rem;bottom:.15rem;right:auto;top:auto;width:auto;height:auto;background:rgba(255,255,255,.88);color:#5A4300;font-size:.62rem;font-weight:800;padding:.12rem .32rem;border-radius:999px}
-.ph-add{display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;border:2px dashed #CBD8D3;border-radius:10px;color:var(--teal);font-size:.74rem;font-weight:800;background:#FAFCFB;cursor:pointer;text-align:center;padding:.3rem}
+.ph-add{position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;aspect-ratio:1/1;border:2px dashed #CBD8D3;border-radius:10px;color:var(--teal);font-size:.74rem;font-weight:800;background:#FAFCFB;cursor:pointer;text-align:center;padding:.3rem;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+.ph-add .ph-add-txt{pointer-events:none}
+.ph-add .ph-file{position:absolute;left:0;top:0;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;font-size:0;border:0;padding:0;margin:0;z-index:2}
+.ph-add .ph-file:focus{outline:none}
+.ph-add:focus-within{outline:2px solid rgba(47,125,107,.35);outline-offset:1px}
+.ph-add:active{filter:brightness(.96)}
 .photo-count{font-size:.74rem;color:var(--muted);font-weight:700}
 
 /* ---------- 대회 ---------- */
