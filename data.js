@@ -12,7 +12,7 @@
 window.TRIP = {
   name: "김상진",
   title: "진의 스윔트립",
-  updated: "2026-11-19",
+  updated: "2026-11-20",
 
   countries: [
     { code: "KOR", name: "대한민국", state: "거주지 · 출발지", cls: "home", cities: "부산 (집)" },
@@ -228,6 +228,148 @@ window.TRIP = {
       place: "대만 펑후 마공", event: "오픈워터", distance: 10, distanceUnit: "km",
       temp: "25~29℃", weather: "", condition: "", time: "3:50:29",
       note: "공식 기록 Net 3:50:29 (타이완 BraveLog 타이밍) · 배번호 011122 · 남자 50-59 부문 6위(6/21) · 종합 43/103 · 부문 6위로 OCEANMAN 파이널 챔피언십 출전권 획득 · 가민 9,995 m 3:51:09 (2:19/100m · 평균 심박 140 · 최대 176 · 스트로크 5,937 · 랩 20)"
+    }
+  ],
+
+  /* ── 수영장 · 바다수영 스팟 ──────────────────────────────────────
+     2026-11-20 추가. 상진님이 실제로 수영한 곳(홈 그라운드·대회·여행)과
+     앞으로 수영할 곳을 구분해 적었습니다.
+       · kind   : "pool"(실내·풀) / "sea"(바다·오픈워터)
+       · status : "home"(홈·계속) / "done"(다녀옴) / "plan"(예정) / "candidate"(후보)
+       · water  : 확인된 수온·환경만. 모르면 빈 값("")으로 두고 화면에서 감춥니다.
+       · features : 확인된 특징·유의점
+       · record : 가민 커넥트·대회 공식 기록에서 확인된 값만
+       · map    : 구글 지도 검색어(좌표를 확인하지 못한 곳은 이름으로만 연결)
+     확인되지 않은 시설명·수치·레인 수는 넣지 않았습니다. */
+  swimSpots: [
+    {
+      id: "songdo", name: "송도해수욕장", en: "Songdo Beach, Busan",
+      kind: "sea", status: "home", city: "부산", country: "대한민국",
+      map: "송도해수욕장 부산",
+      water: "11월 수온 16.4~17℃ · 웻슈트 필요",
+      features: ["안쪽 만이라 파고 0.1~0.5 m로 잔잔", "물때에 따라 수심·조류가 달라져 만조·간조 시각 확인", "새벽 입수는 어두워 부이 라이트 지참"],
+      record: "새벽 바다수영 홈 스팟 — 2026-11-14 조건 확인(수온 16.4~17℃·13물·간조 04:14)"
+    },
+    {
+      id: "busan-nsc", name: "부산국민체육센터", en: "Busan National Sports Center",
+      kind: "pool", status: "home", city: "부산", country: "대한민국",
+      map: "부산국민체육센터 수영장",
+      water: "",
+      features: ["귀국 뒤 겨울 실내 훈련장 — 2026-11-18 12월 수영 등록 완료", "요일·시간대는 확인 중"],
+      record: "2026-12부터 등록한 일정으로 훈련 예정",
+      note: "레인 수·수온은 아직 확인하지 못했습니다."
+    },
+    {
+      id: "changi", name: "창이공항 T1 환승호텔 루프탑 수영장", en: "Changi Transit Hotel T1 Rooftop Pool",
+      kind: "pool", status: "done", city: "싱가포르 창이공항", country: "싱가포르",
+      map: "Changi Airport Terminal 1 Transit Hotel",
+      water: "가민 기록 온도 27~35℃",
+      features: ["투숙객 무료 10:00~22:00 · 수건·샤워실 포함", "환승구역(Airside) 안 — 입국심사 없이 이용", "야외 루프탑이라 비 오면 이용이 어려움"],
+      record: "2026-11-19 356 m · 29:55 · 평균 심박 89 (가민 커넥트)"
+    },
+    {
+      id: "ocbc", name: "OCBC 아쿠아틱 센터", en: "OCBC Aquatic Centre",
+      kind: "pool", status: "done", city: "싱가포르", country: "싱가포르",
+      map: "OCBC Aquatic Centre Singapore",
+      water: "",
+      features: ["2025 세계마스터즈 수영(풀) 경기장", "남자 55–59세부 · 소속 SWIMON"],
+      record: "2025-08-11 200 m 개인혼영 · 08-12 100 m 배영 — 공식 결과 두 종목 모두 NT"
+    },
+    {
+      id: "mission-viejo", name: "마르게리트 아쿠아틱 센터", en: "Marguerite Aquatic Center, Mission Viejo",
+      kind: "pool", status: "done", city: "미국 캘리포니아 미션 비에호", country: "미국",
+      map: "Marguerite Aquatic Center Mission Viejo",
+      water: "",
+      features: ["25야드 야드풀 · USMS 336-S004 마스터스 SCY 미트", "2026 Mission Viejo Nadadores Masters SCY Swim Meet"],
+      record: "2026-03-08 200야드 자유형 1위 · 100야드 개인혼영 3위 · 워밍업 464 m"
+    },
+    {
+      id: "janet-evans", name: "재닛 에번스 수영장", en: "Janet Evans Swim Complex, Fullerton",
+      kind: "pool", status: "done", city: "미국 캘리포니아 풀러턴", country: "미국",
+      map: "Janet Evans Swim Complex Fullerton",
+      water: "",
+      features: ["2026-03 미국 여행의 주 훈련장 (3/5~3/7 나흘)"],
+      record: "3/5 3,096 m(1:31:01) · 3/6 3,566 m(1:56:04) · 3/7 1,550 m + 1,135 m"
+    },
+    {
+      id: "la-habra", name: "라하브라 숙소 수영장", en: "La Habra lodging pool",
+      kind: "pool", status: "done", city: "미국 캘리포니아 라하브라", country: "미국",
+      map: "La Habra California",
+      water: "",
+      features: ["숙소 수영장 — 짧은 몸풀기용"],
+      record: "2026-03-03 128 m · 7:50 (가민 커넥트)"
+    },
+    {
+      id: "newport", name: "뉴포트비치", en: "Newport Beach",
+      kind: "sea", status: "done", city: "미국 캘리포니아 뉴포트비치", country: "미국",
+      map: "Newport Beach California",
+      water: "3월 수온 미확인",
+      features: ["태평양 해변 오픈워터 — 파도·조류가 있는 바다"],
+      record: "2026-03-22 1,245 m · 1:02:12 / 608 m · 12:53 (가민 커넥트)"
+    },
+    {
+      id: "nyc-rec", name: "뉴욕 체육센터 실내 풀", en: "Recreation Center pool, New York",
+      kind: "pool", status: "done", city: "미국 뉴욕", country: "미국",
+      map: "Recreation Center pool New York",
+      water: "",
+      features: ["시설 정식 명칭은 가민 기록에 남아 있지 않음"],
+      record: "2026-03-26 375 m · 37:36 · 평균 심박 137 (귀국일 아침)"
+    },
+    {
+      id: "penghu", name: "펑후 오션맨 10K", en: "OCEANMAN Penghu 10 km",
+      kind: "sea", status: "done", city: "대만 펑후 마공", country: "대만",
+      map: "Penghu Magong Taiwan",
+      water: "25~29℃",
+      features: ["국제 해수욕 펑후만 코스 · 랩 20", "배번호 011122"],
+      record: "2026-06-13 9,995 m · 3:51:09 · 2:19/100m · 공식 3:50:29 · 남자 50-59 부문 6위"
+    },
+    {
+      id: "coogee", name: "쿠지 비치", en: "Coogee Beach, WA",
+      kind: "sea", status: "plan", city: "호주 퍼스 쿠지", country: "호주",
+      map: "Coogee Beach Western Australia",
+      water: "",
+      features: ["10km 대회는 기상으로 11/28 연기 — 귀국일과 겹쳐 불참", "11/21 아침 해변 러닝(06:00~07:15)으로 방문"],
+      record: "2026-11-20~24 쿠지 숙소 · 대회 기록 없음"
+    },
+    {
+      id: "bondi", name: "본다이 아이스버그 수영장", en: "Bondi Icebergs Pool",
+      kind: "pool", status: "plan", city: "호주 시드니 본다이", country: "호주",
+      map: "Bondi Icebergs Pool 1 Notts Ave Bondi Beach",
+      water: "태즈먼 해수가 들어오는 50 m 해수풀",
+      features: ["1 Notts Ave, Bondi Beach NSW · 입장 A$10", "수요일 06:00~18:30 · 목요일만 청소 휴무", "사우나 있음"],
+      record: "2026-11-25 06:15 본다이 런클럽(5 km) 뒤 수영 예정"
+    },
+    {
+      id: "jurien", name: "줄리안 베이", en: "Jurien Bay",
+      kind: "sea", status: "plan", city: "호주 서호주 줄리안 베이", country: "호주",
+      map: "Jurien Bay Breakwater Drive",
+      water: "",
+      features: ["2026-11-23 07:00 바다사자 수영 (Jurien Bay Oceanic Experience)", "Breakwater Dr 06:45 체크인 · 쿠지에서 247.5 km(2시간 40분)", "해양포유류 60 m 이내 드론 금지"],
+      record: "예약 R4PGCDN · AU$233.35 결제 완료"
+    },
+    {
+      id: "mooloolaba", name: "물루라바 비치", en: "Mooloolaba Beach",
+      kind: "sea", status: "candidate", city: "호주 선샤인코스트", country: "호주",
+      map: "Mooloolaba Beach Queensland",
+      water: "",
+      features: ["깃발 구역에서 수영 — 라이프가드 07:30~17:00", "샤워·탈의실 있음 · 600번 버스 50센트", "숙소(코튼트리)에서 4.0 km"],
+      record: "2026-11-26 오전 루틴 후보 — 미확정"
+    },
+    {
+      id: "cotton-tree", name: "코튼트리 아쿠아틱 센터", en: "Cotton Tree Aquatic Centre",
+      kind: "pool", status: "candidate", city: "호주 선샤인코스트", country: "호주",
+      map: "Cotton Tree Aquatic Centre Maroochydore",
+      water: "50 m 온수 풀 26℃",
+      features: ["비·강풍으로 바다 수영이 어려울 때 대안"],
+      record: "2026-11-26 후보 — 미확정"
+    },
+    {
+      id: "balaton", name: "발라톤 호수", en: "Lake Balaton",
+      kind: "sea", status: "plan", city: "헝가리 부다페스트(발라톤)", country: "헝가리",
+      map: "Lake Balaton Hungary",
+      water: "6월 말 22~25℃ 예상 (공식 발표 전)",
+      features: ["2027 세계마스터즈 오픈워터 3K — 남자 60–64세부", "노슈트·민물이라 바다보다 부력이 적음"],
+      record: "2027-06-29~30 출전 목표 — 등록 마감일 미공지"
     }
   ],
 

@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#0F352E">
 <meta name="description" content="진의 스윔트립 — 다녀온 나라·도시, 날짜별 기록과 사진, 수영대회 기록.">
 <title>진의 스윔트립</title>
-<link rel="stylesheet" href="styles.css?d=11">
+<link rel="stylesheet" href="styles.css?d=12">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8F%8A%EF%B8%8F%3C/text%3E%3C/svg%3E">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="icon-192.png">
@@ -32,6 +32,7 @@
     <button class="tab" data-tab="days" type="button">③ 일정·기록</button>
     <button class="tab" data-tab="comp" type="button">④ 수영대회</button>
     <button class="tab" data-tab="codes" type="button">⑤ 예약 코드</button>
+    <button class="tab" data-tab="spots" type="button">⑥ 수영 스팟</button>
   </nav>
 </header>
 
@@ -162,6 +163,19 @@
     <p class="hint">적어 둔 코드가 있는 항목은 <b>복사</b> 버튼으로 바로 클립보드에 담깁니다.</p>
   </section>
 
+  <!-- ⑥ 수영장 · 바다수영 스팟 -->
+  <section class="panel" id="panel-spots">
+    <h2 class="sect first">수영장 · 바다수영 스팟</h2>
+    <p class="hint">상진님이 실제로 수영한 실내 풀과 바다, 앞으로 수영할 곳을 한자리에 모았습니다. 구분과 위치, 수온·특징, 가민 기록을 함께 봅니다. 확인하지 못한 값은 비워 두었습니다.</p>
+    <div class="spot-sum" id="spotSum"></div>
+    <div class="filters" id="spotFilters" role="group" aria-label="수영 스팟 종류 고르기"></div>
+    <div class="spotgrid" id="spots"></div>
+    <div class="callout">
+      <strong>장소를 특정하지 않은 기록</strong>
+      가민 활동에 위치 태그가 없는 실외 수영은 어느 곳인지 단정하지 않았습니다 — 2025-08-13 싱가포르 실외 수영 1,204 m, 2026-10-25 최장 6,500 m, 2026-11-15 4,447 m(2:08/100m)가 그렇습니다. 장소가 확인되는 대로 붙여 두겠습니다.
+    </div>
+  </section>
+
 </main>
 
 <footer class="foot">
@@ -196,8 +210,8 @@
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="world.js"></script>
-<script src="data.js?v=24"></script>
-<script src="app.js?v=13"></script>
+<script src="data.js?v=25"></script>
+<script src="app.js?v=14"></script>
 <script>
 /* 오프라인 사용: 평소에는 최신 파일을 받고, 인터넷이 없으면 저장된 화면을 엽니다. */
 if ('serviceWorker' in navigator) {

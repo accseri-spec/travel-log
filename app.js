@@ -630,6 +630,95 @@
     }).join("");
   }
 
+  /* ---------------- 수영장 · 바다수영 스팟 ---------------- */
+  var SPOT_FILTERS = [
+    { key: "all",  label: "전체" },
+    { key: "pool", label: "🏊 실내 풀" },
+    { key: "sea",  label: "🌊 바다·오픈워터" },
+    { key: "done", label: "✅ 다녀온 곳" },
+    { key: "plan", label: "📅 예정·후보" }
+  ];
+  var spotFilter = "all";
+
+  function spotPass(s) {
+    if (spotFilter === "all") return true;
+    if (spotFilter === "pool" || spotFilter === "sea") return s.kind === spotFilter;
+    if (spotFilter === "done") return s.status === "home" || s.status === "done";
+    return s.status === "plan" || s.status === "candidate";
+  }
+  function spotKindBadge(s) {
+    return s.kind === "pool" ? '<span class="badge spool">🏊 실내 풀</span>' : '<span class="badge ssea">🌊 바다·오픈워터</span>';
+  }
+  function spotStatusBadge(s) {
+    if (s.status === "home") return '<span class="badge done">홈 · 계속</span>';
+    if (s.status === "done") return '<span class="badge done">다녀옴</span>';
+    if (s.status === "plan") return '<span class="badge">예정</span>';
+    return '<span class="badge warn">후보</span>';
+  }
+  function spotRow(k, v, isList) {
+    return '<div class="srow"><span class="k">' + esc(k) + '</span><span class="v">' +
+      (isList ? '<ul class="spot-list">' + v.map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") + "</ul>" : esc(v)) +
+      "</span></div>";
+  }
+  function mapLink(map) {
+    if (!map) return "";
+    return '<a class="maplink" href="https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(map) +
+      '" target="_blank" rel="noopener">🗺 지도에서 보기</a>';
+  }
+  function renderSpotSum() {
+    var host = $("#spotSum");
+    if (!host) return;
+    var all = T.swimSpots || [];
+    var pool = all.filter(function (s) { return s.kind === "pool"; }).length;
+    var sea = all.length - pool;
+    var done = all.filter(function (s) { return s.status === "home" || s.status === "done"; }).length;
+    var plan = all.filter(function (s) { return s.status === "plan"; }).length;
+    var cand = all.filter(function (s) { return s.status === "candidate"; }).length;
+    host.innerHTML =
+      '<span class="ssum"><b>🏊 실내 풀 ' + pool + '</b>곳</span>' +
+      '<span class="ssum"><b>🌊 바다·오픈워터 ' + sea + '</b>곳</span>' +
+      '<span class="ssum">다녀온 곳 <b>' + done + '</b> · 예정 <b>' + plan + '</b> · 후보 <b>' + cand + '</b></span>';
+  }
+  function renderSpotFilters() {
+    var host = $("#spotFilters");
+    if (!host) return;
+    host.innerHTML = SPOT_FILTERS.map(function (f) {
+      return '<button type="button" class="chip' + (spotFilter === f.key ? " is-on" : "") + '" data-spotflt="' + f.key +
+        '" aria-pressed="' + (spotFilter === f.key ? "true" : "false") + '">' + esc(f.label) + "</button>";
+    }).join("");
+    $$("[data-spotflt]", host).forEach(function (b) {
+      b.addEventListener("click", function () {
+        spotFilter = b.getAttribute("data-spotflt");
+        renderSpotFilters();
+        renderSpots();
+      });
+    });
+  }
+  function renderSpots() {
+    var host = $("#spots");
+    if (!host) return;
+    renderSpotSum();
+    renderSpotFilters();
+    var list = (T.swimSpots || []).filter(spotPass);
+    if (!list.length) { host.innerHTML = '<div class="empty">해당하는 스팟이 없습니다.</div>'; return; }
+    host.innerHTML = list.map(function (s) {
+      return '<article class="spot">' +
+        '<div class="spot-head">' +
+          '<div class="spot-name">' + esc(s.name) + spotKindBadge(s) + spotStatusBadge(s) + '</div>' +
+          (s.en ? '<div class="spot-en">' + esc(s.en) + '</div>' : "") +
+          '<div class="spot-where">📍 ' + esc(s.city + " · " + s.country) + "</div>" +
+        "</div>" +
+        '<div class="spot-rows">' +
+          (s.water ? spotRow("수온·환경", s.water) : "") +
+          (s.features && s.features.length ? spotRow("특징", s.features, true) : "") +
+          (s.record ? spotRow("내 기록", s.record) : "") +
+          (s.note ? spotRow("비고", s.note) : "") +
+        "</div>" +
+        mapLink(s.map) +
+        "</article>";
+    }).join("");
+  }
+
   /* ---------------- 미확정 · 체크리스트 · 비상 ---------------- */
   function renderTodos() {
     $("#todos").innerHTML = T.todos.map(function (t) {
@@ -1333,6 +1422,7 @@
     renderTodos();
     renderChecklist();
     renderEmergency();
+    renderSpots();
     refresh();
     renderCalendar();
     bindCalendar();
@@ -1342,7 +1432,7 @@
       t.addEventListener("click", function () { showTab(t.getAttribute("data-tab")); });
     });
     var initial = (location.hash || "").replace("#", "");
-    if (["cover", "prep", "days", "comp", "codes"].indexOf(initial) >= 0) showTab(initial);
+    if (["cover", "prep", "days", "comp", "codes", "spots"].indexOf(initial) >= 0) showTab(initial);
 
     if (mapZoom) {
       $("#btnMapZoomIn").addEventListener("click", function () { mapZoom.zoom(1.7); });
