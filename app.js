@@ -633,7 +633,7 @@
   /* ---------------- 수영장 · 바다수영 스팟 ---------------- */
   var SPOT_FILTERS = [
     { key: "all",  label: "전체" },
-    { key: "pool", label: "🏊 실내 풀" },
+    { key: "pool", label: "🏊 풀(수영장)" },
     { key: "sea",  label: "🌊 바다·오픈워터" },
     { key: "done", label: "✅ 다녀온 곳" },
     { key: "plan", label: "📅 예정·후보" }
@@ -647,7 +647,7 @@
     return s.status === "plan" || s.status === "candidate";
   }
   function spotKindBadge(s) {
-    return s.kind === "pool" ? '<span class="badge spool">🏊 실내 풀</span>' : '<span class="badge ssea">🌊 바다·오픈워터</span>';
+    return s.kind === "pool" ? '<span class="badge spool">🏊 풀</span>' : '<span class="badge ssea">🌊 바다·오픈워터</span>';
   }
   function spotStatusBadge(s) {
     if (s.status === "home") return '<span class="badge done">홈 · 계속</span>';
@@ -675,7 +675,7 @@
     var plan = all.filter(function (s) { return s.status === "plan"; }).length;
     var cand = all.filter(function (s) { return s.status === "candidate"; }).length;
     host.innerHTML =
-      '<span class="ssum"><b>🏊 실내 풀 ' + pool + '</b>곳</span>' +
+      '<span class="ssum"><b>🏊 풀 ' + pool + '</b>곳</span>' +
       '<span class="ssum"><b>🌊 바다·오픈워터 ' + sea + '</b>곳</span>' +
       '<span class="ssum">다녀온 곳 <b>' + done + '</b> · 예정 <b>' + plan + '</b> · 후보 <b>' + cand + '</b></span>';
   }
