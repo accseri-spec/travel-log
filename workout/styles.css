@@ -193,7 +193,6 @@ button.cday:active{transform:scale(.95)}
 .pbar .pfill{display:block;height:100%;border-radius:999px}
 .pbar.mine .pfill{background:var(--teal)}
 .pbar.mine .pn{color:var(--teal)}
-.pbar.bud .pfill{background:#7FB3A2}
 .pbar.doha .pfill{background:var(--blue)}
 .pbar .pnote{grid-column:1/-1;font-size:.7rem;color:#8A9691;font-weight:700}
 .pace-legend{font-size:.72rem;color:#8A9691;margin:.5rem 0 .1rem}

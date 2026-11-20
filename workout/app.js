@@ -417,7 +417,6 @@
     if (!box) return;
     var rows = [
       { key: "mine", name: "내 1,500 m 최고", sec: 90.1, note: "1:30.1 /100m · 22:32 (2026-11-11)" },
-      { key: "bud", name: "2017 부다페스트 메달권", sec: 91.5, note: "1:31.5 /100m · 45:42~45:47 (3,000 m)" },
       { key: "doha", name: "2024 도하 메달권", sec: 81.2, note: "1:21.2 /100m · 40:35 (3,000 m 3위)" }
     ];
     box.innerHTML = rows.map(function (r) {
